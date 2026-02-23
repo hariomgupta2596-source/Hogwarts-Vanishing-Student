@@ -1,14 +1,26 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { BookOpen, Sparkles } from "lucide-react";
+import { BookOpen, Sparkles, Trophy } from "lucide-react";
 import { useLogin } from "@/hooks/use-game";
 import { FloatingOrbs } from "@/components/FloatingOrbs";
+import { useToast } from "@/hooks/use-toast";
+import { useGameStore } from "@/lib/store";
+import { useEffect } from "react";
+import { Link } from "wouter";
 
 export function Intro() {
   const [username, setUsername] = useState("");
   const { mutate: login, isPending } = useLogin();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const user = useGameStore(state => state.user);
+
+  useEffect(() => {
+    if (user) {
+      setLocation("/hub");
+    }
+  }, [user, setLocation]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,6 +29,13 @@ export function Intro() {
     login({ username }, {
       onSuccess: () => {
         setLocation("/hub");
+      },
+      onError: (error: any) => {
+        toast({
+          title: "Access Denied",
+          description: error.message || "This investigator has already completed their mission.",
+          variant: "destructive",
+        });
       }
     });
   };
@@ -24,6 +43,13 @@ export function Intro() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       <FloatingOrbs />
+
+      <div className="absolute top-8 right-8 z-20">
+        <Link href="/leaderboard" className="flex items-center gap-2 text-primary/70 hover:text-primary transition-colors font-serif">
+          <Trophy className="w-5 h-5" />
+          <span>Leaderboard</span>
+        </Link>
+      </div>
       
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}

@@ -1,8 +1,9 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import { useGameStore } from "@/lib/store";
 import { PageWrapper } from "./PageWrapper";
 import { motion } from "framer-motion";
+import { useEffect } from "react";
 
 interface GameLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,15 @@ interface GameLayoutProps {
 
 export function GameLayout({ children, title }: GameLayoutProps) {
   const user = useGameStore(state => state.user);
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!user) {
+      setLocation("/");
+    }
+  }, [user, setLocation]);
+
+  if (!user) return null;
 
   return (
     <PageWrapper>

@@ -5,8 +5,11 @@ import { GameLayout } from "@/components/GameLayout";
 import { useFinalChoice } from "@/hooks/use-game";
 import { Shield, Eye, Trash2 } from "lucide-react";
 
+import { useGameStore } from "@/lib/store";
+
 export function Verdict() {
   const { mutate: makeChoice, isPending } = useFinalChoice();
+  const logout = useGameStore(state => state.logout);
   const [, setLocation] = useLocation();
   const [selected, setSelected] = useState<"seal" | "expose" | "erase" | null>(null);
 
@@ -14,7 +17,10 @@ export function Verdict() {
     setSelected(choice);
     makeChoice({ choice }, {
       onSuccess: () => {
-        setTimeout(() => setLocation("/leaderboard"), 1500);
+        setTimeout(() => {
+          logout();
+          setLocation("/");
+        }, 3000);
       }
     });
   };
