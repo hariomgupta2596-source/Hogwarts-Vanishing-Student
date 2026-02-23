@@ -1,0 +1,118 @@
+🧙‍♂️📜 FULL GAME STORY
+“The Vanishing Student of Hogwarts”
+(A Logical Mystery Adventure)
+
+🏰 Prologue: A Glitch in the Magic
+At midnight, deep inside Hogwarts Castle, the Enchanted Student Registry begins to malfunction.
+A warning echoes through the halls:
+⚠️ “Student detected without identity.”
+ ⚠️ “Classes attended. Records missing.”
+A student has:
+Appeared in class
+Left traces in Hogsmeade
+Broken time consistency
+Yet officially… does not exist.
+Fearing misuse of magic or a flaw in the system itself, Professor McGonagall summons a select group of students — YOU.
+You are appointed as Junior Investigators for the Department of Mysteries.
+Your mission:
+Use logic, deduction, and system-level thinking to uncover the Invisible Student before the records erase themselves forever.
+
+🪄 MINI-GAME 1: The Sorting Hat Interface
+(Merged ice-breaker + system access)
+🎮 Story
+Before you can access the magical records, the Sorting Hat blocks the way.
+It declares:
+“Only minds that understand patterns may enter.”
+🎮 Gameplay
+Student profile cards float in the air.
+Four Hogwarts Houses appear.
+Each profile has traits, habits, and strengths.
+🖱️ Players classify students into houses by dragging cards.
+When enough profiles are logically matched, the Sorting Hat laughs and opens the gate.
+🧠 What’s Really Happening
+Classification
+Feature matching
+Rule-based logic
+🪄 You’ve just passed a system-level access check — without an exam.
+
+🍺 MINI-GAME 2: The Three Broomsticks Data Reconstruction
+(Merged arithmetic + data cleaning)
+🎮 Story
+Inside the archives, you discover a damaged receipt from the Three Broomsticks.
+Madam Rosmerta mutters:
+“Someone was here… but the details don’t add up.”
+🎮 Gameplay
+Receipt fragments are scattered.
+Items, prices, and quantities are mismatched.
+NPC clues hint at inconsistencies.
+🖱️ Players reconstruct the receipt by fixing incorrect or missing data.
+When the receipt becomes logically consistent, a hidden detail reveals:
+The Invisible Student was present.
+🧠 What’s Really Happening
+Data consistency
+Debugging
+Constraint satisfaction
+🍻 This feels like fixing broken data, not solving sums.
+
+🔮 MINI-GAME 3: The Pensieve Paradox
+(Merged timeline + anomaly detection)
+🎮 Story
+The trail leads to a Pensieve holding memories of the same evening.
+As you observe, something is wrong:
+Events overlap
+Times contradict each other
+A whisper echoes:
+“One of these memories cannot be real.”
+🎮 Gameplay
+Events appear as glowing orbs on a timeline.
+Players drag events to restore logical order.
+One memory cannot fit anywhere without breaking logic.
+🖱️ Players must identify and remove the corrupted memory.
+🧠 What’s Really Happening
+Conflict detection
+Logical sequencing
+Identifying impossible states
+🔮 This is debugging a system timeline.
+
+👻 MINI-GAME 4: The Invisible Student Detector
+(Core mystery level)
+🎮 Story
+You finally reach the Hogwarts Class Register.
+Names, rolls, attendance, magical traces…
+One entry behaves strangely:
+Present in some records
+Missing in others
+The parchment trembles:
+“This student exists… but is unseen.”
+🎮 Gameplay
+Players can toggle data layers:
+Attendance
+Physical presence
+Identity
+🖱️ By comparing layers, players identify the student who appears without registration.
+A chill runs through the room.
+The Invisible Student has been found.
+🧠 What’s Really Happening
+Cross-data validation
+Missing records
+System inconsistency detection
+🔥 This is the emotional peak of the game.
+
+⚖️ FINAL: The Wizengamot Verdict
+(No puzzle — pure decision)
+🎮 Story
+The truth is revealed.
+Now the Wizengamot demands your recommendation.
+You are given three choices:
+📁 Seal the Records – Protect the system, hide the flaw
+🪄 Expose the Truth – Reveal the weakness, accept consequences
+❌ Erase All Data – Remove the anomaly forever
+There is no correct answer.
+Your choice determines:
+Final score
+Ending scene
+Position on the House Cup Leaderboard
+🧠 What’s Really Happening
+Ethical reasoning
+Decision trees
+Trade-off analysis
