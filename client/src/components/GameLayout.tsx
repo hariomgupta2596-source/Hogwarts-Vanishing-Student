@@ -16,7 +16,7 @@ export function GameLayout({ children, title }: GameLayoutProps) {
 
   useEffect(() => {
     if (!user) {
-      setLocation("/");
+      setLocation("/login");
     }
   }, [user, setLocation]);
 

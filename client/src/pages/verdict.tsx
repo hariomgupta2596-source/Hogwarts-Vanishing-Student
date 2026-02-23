@@ -19,7 +19,7 @@ export function Verdict() {
       onSuccess: () => {
         setTimeout(() => {
           logout();
-          setLocation("/");
+          setLocation("/login");
         }, 3000);
       }
     });
