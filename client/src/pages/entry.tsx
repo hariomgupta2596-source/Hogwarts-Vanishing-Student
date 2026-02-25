@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles } from "lucide-react";
 import { FloatingOrbs } from "@/components/FloatingOrbs";
+import entryBg from "@assets/Entry_Background_1772032172890.png";
+import playBtnImg from "@assets/play1_1772032184266.png";
 
 export function Entry() {
   const [loading, setLoading] = useState(true);
@@ -10,19 +11,21 @@ export function Entry() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    // Start loading sequence
     const timer = setTimeout(() => {
       setLoading(false);
       setTimeout(() => {
         setShowButton(true);
       }, 500);
-    }, 5500); // 5s for the bar + small delay
+    }, 5500);
 
     return () => clearTimeout(timer);
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-[#0a0a0f]">
+    <div 
+      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden bg-cover bg-center"
+      style={{ backgroundImage: `linear-gradient(rgba(10, 10, 15, 0.7), rgba(10, 10, 15, 0.7)), url(${entryBg})` }}
+    >
       <FloatingOrbs />
       
       <AnimatePresence>
@@ -59,15 +62,17 @@ export function Entry() {
           >
             <button
               onClick={() => setLocation("/login")}
-              className="image-button group show-button"
+              className="group transition-transform hover:scale-110 active:scale-95"
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full group-hover:bg-primary/40 transition-colors" />
-                <div className="relative bg-background/40 p-8 rounded-full border-2 border-primary/30 group-hover:border-primary transition-colors box-glow">
-                  <Sparkles className="w-16 h-16 text-primary animate-pulse" />
-                </div>
+                <img 
+                  src={playBtnImg} 
+                  alt="Enter Hogwarts" 
+                  className="relative w-48 h-48 object-contain drop-shadow-[0_0_15px_rgba(212,175,55,0.5)]"
+                />
               </div>
-              <div className="text-center space-y-2">
+              <div className="text-center mt-4 space-y-2">
                 <p className="font-display text-2xl text-primary text-glow tracking-widest uppercase">Enter Hogwarts</p>
                 <p className="font-serif text-muted-foreground text-sm italic">Begin your investigation</p>
               </div>
