@@ -9,6 +9,9 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   score: integer("score").default(0).notNull(),
   completedGames: integer("completed_games").default(0).notNull(),
+    password: text("password"),
+    house: text("house"),
+    startTime: timestamp("start_time"),
   finalChoice: text("final_choice"), // 'seal', 'expose', 'erase'
   createdAt: timestamp("created_at").defaultNow(),
 });
