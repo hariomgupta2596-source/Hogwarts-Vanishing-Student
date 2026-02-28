@@ -5,7 +5,7 @@ import { eq, desc } from "drizzle-orm";
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: Pick<InsertUser, "username">): Promise<User>;
+  createUser(user: Pick<InsertUser, "username" | "password" | "house">): Promise<User>;
   updateUserProgress(id: number, scoreAdded: number, gameCompleted: number): Promise<User | undefined>;
   makeFinalChoice(id: number, choice: "seal" | "expose" | "erase"): Promise<User | undefined>;
   getLeaderboard(): Promise<User[]>;
@@ -22,8 +22,8 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async createUser(insertUser: Pick<InsertUser, "username">): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+  async createUser(insertUser: Pick<InsertUser, "username" | "password" | "house">): Promise<User> {
+    const [user] = await db.insert(users).values({ ...insertUser, startTime: new Date() }).returning();
     return user;
   }
 
@@ -47,9 +47,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async makeFinalChoice(id: number, choice: "seal" | "expose" | "erase"): Promise<User | undefined> {
+    const user = await this.getUser(id);
+    if (!user) return undefined;
+
+    let finalScore = user.score;
+    
+    // Time Bonus calculation
+    if (user.startTime) {
+      const elapsedMs = new Date().getTime() - new Date(user.startTime).getTime();
+      const thirtyMinsMs = 30 * 60 * 1000;
+      if (elapsedMs < thirtyMinsMs) {
+        const remainingMins = (thirtyMinsMs - elapsedMs) / (60 * 1000);
+        finalScore += Math.floor(remainingMins * 10); // 10 points per remaining minute
+      }
+    }
+
+    // Final Choice Bonus
+    const choiceBonuses = {
+      seal: 50,
+      expose: 100,
+      erase: 75
+    };
+    finalScore += choiceBonuses[choice];
+
     const [updatedUser] = await db
       .update(users)
-      .set({ finalChoice: choice })
+      .set({ 
+        finalChoice: choice,
+        score: finalScore 
+      })
       .where(eq(users.id, id))
       .returning();
       

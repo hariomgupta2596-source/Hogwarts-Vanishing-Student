@@ -21,6 +21,8 @@ export const api = {
       path: "/api/users" as const,
       input: z.object({
         username: z.string().min(1).max(50),
+        password: z.string().min(1),
+        house: z.string().min(1),
       }),
       responses: {
         200: z.custom<typeof users.$inferSelect>(), // Return existing
