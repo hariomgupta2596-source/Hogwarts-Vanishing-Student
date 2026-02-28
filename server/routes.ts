@@ -17,6 +17,9 @@ export async function registerRoutes(
       let user = await storage.getUserByUsername(input.username);
       
       if (user) {
+        if (user.password !== input.password) {
+          return res.status(401).json({ message: "Invalid access cipher." });
+        }
         // Return existing user only if they haven't finished the game
         if (user.finalChoice) {
           return res.status(403).json({ 

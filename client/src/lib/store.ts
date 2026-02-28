@@ -17,7 +17,7 @@ export const useGameStore = create<GameState>()(
       setUser: (user) => set({ user }),
       house: null,
       setHouse: (house) => set({ house }),
-      logout: () => set({ user: null }),
+      logout: () => set({ user: null, house: null }),
     }),
     {
       name: 'vanishing-student-storage',
