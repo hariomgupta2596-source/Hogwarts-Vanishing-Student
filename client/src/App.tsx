@@ -7,6 +7,7 @@ import NotFound from "@/pages/not-found";
 
 import { Intro } from "./pages/intro";
 import { Entry } from "./pages/entry";
+import { Story } from "./pages/story";
 import { Hub } from "./pages/hub";
 import { Game1 } from "./pages/game1";
 import { Game2 } from "./pages/game2";
@@ -20,6 +21,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Entry} />
       <Route path="/login" component={Intro} />
+      <Route path="/story" component={Story} />
       <Route path="/hub" component={Hub} />
       <Route path="/game/1" component={Game1} />
       <Route path="/game/2" component={Game2} />
