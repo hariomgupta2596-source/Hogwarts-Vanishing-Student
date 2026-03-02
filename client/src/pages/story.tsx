@@ -1,24 +1,29 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, ArrowRight, Sparkles } from "lucide-react";
+import { BookOpen, ArrowRight, Sparkles, Shield } from "lucide-react";
 import { FloatingOrbs } from "@/components/FloatingOrbs";
 import entryBg from "@assets/Entry_Background_1772032172890.png";
 
 const STORY_STEPS = [
   {
-    title: "The Vanishing",
-    content: "A student has been erased from the very archives of Hogwarts. Not just their records, but their very existence in memory.",
-    icon: BookOpen
-  },
-  {
-    title: "The Wizengamot's Decree",
-    content: "The Ministry is in turmoil. They require a Master Investigator to piece together the scattered fragments of truth before they are lost forever.",
+    title: "A Glitch in the Magic",
+    content: "At midnight, deep inside Hogwarts Castle, the Enchanted Student Registry begins to malfunction. A warning echoes through the halls: ⚠️ 'Student detected without identity.' ⚠️ 'Classes attended. Records missing.'",
     icon: Sparkles
   },
   {
-    title: "Your Mission",
-    content: "The traces are cold, and the magic is volatile. You must navigate the castle, solve the logic of the past, and uncover what they tried to hide.",
+    title: "The Paradox",
+    content: "A student has appeared in class and left traces in Hogsmeade, breaking time consistency. Yet officially... they do not exist.",
+    icon: BookOpen
+  },
+  {
+    title: "The Summons",
+    content: "Fearing misuse of magic or a flaw in the system, Professor McGonagall summons a select group of students — YOU. You are appointed as Junior Investigators for the Department of Mysteries.",
+    icon: Shield
+  },
+  {
+    title: "The Mission",
+    content: "Use logic, deduction, and system-level thinking to uncover the Invisible Student before the records erase themselves forever.",
     icon: ArrowRight
   }
 ];
