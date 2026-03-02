@@ -47,7 +47,7 @@ export function Intro() {
     setHouse(selectedHouse);
     login({ username, password, house: selectedHouse }, {
       onSuccess: () => {
-        setLocation("/hub");
+        setLocation("/story");
       },
       onError: (error: any) => {
         toast({
