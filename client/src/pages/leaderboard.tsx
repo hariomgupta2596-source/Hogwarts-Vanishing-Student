@@ -26,10 +26,10 @@ export function Leaderboard() {
         ) : (
           <div className="glass-panel rounded-2xl overflow-hidden">
             <div className="grid grid-cols-12 gap-4 p-6 border-b border-primary/20 bg-primary/5 font-display text-primary tracking-wider">
-              <div className="col-span-2 text-center">Rank</div>
-              <div className="col-span-4">Investigator</div>
-              <div className="col-span-3 text-center">Score</div>
-              <div className="col-span-3 text-right">Decree</div>
+              <div className="col-span-1 text-center">Rank</div>
+              <div className="col-span-5">Investigator</div>
+              <div className="col-span-2 text-center">Score</div>
+              <div className="col-span-4 text-right">Decree</div>
             </div>
             
             <div className="divide-y divide-primary/10">
@@ -41,19 +41,20 @@ export function Leaderboard() {
                   key={user.id}
                   className="grid grid-cols-12 gap-4 p-6 items-center font-serif transition-colors hover:bg-white/5"
                 >
-                  <div className="col-span-2 flex justify-center">
+                  <div className="col-span-1 flex justify-center">
                     {index === 0 ? <Medal className="w-8 h-8 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]" /> : 
                      index === 1 ? <Medal className="w-7 h-7 text-gray-400 drop-shadow-[0_0_8px_rgba(156,163,175,0.8)]" /> : 
                      index === 2 ? <Medal className="w-6 h-6 text-amber-700 drop-shadow-[0_0_8px_rgba(180,83,9,0.8)]" /> : 
                      <span className="text-xl font-display text-muted-foreground">#{index + 1}</span>}
                   </div>
-                  <div className="col-span-4 font-bold text-lg text-foreground">
-                    {user.username}
+                  <div className="col-span-5 flex flex-col">
+                    <span className="font-bold text-lg text-foreground">{user.username}</span>
+                    <span className="text-xs text-primary/60 font-display uppercase tracking-tighter">{user.equippedItem || 'Standard Robes'}</span>
                   </div>
-                  <div className="col-span-3 text-center text-primary font-bold text-xl">
+                  <div className="col-span-2 text-center text-primary font-bold text-xl">
                     {user.score}
                   </div>
-                  <div className="col-span-3 text-right">
+                  <div className="col-span-4 text-right">
                     <span className={`px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider
                       ${user.finalChoice === 'expose' ? 'bg-primary/20 text-primary border border-primary/30' : 
                         user.finalChoice === 'seal' ? 'bg-blue-900/40 text-blue-400 border border-blue-400/30' : 

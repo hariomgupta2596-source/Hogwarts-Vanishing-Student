@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { users, type User, type InsertUser } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -9,6 +9,7 @@ export interface IStorage {
   updateUserProgress(id: number, scoreAdded: number, gameCompleted: number): Promise<User | undefined>;
   makeFinalChoice(id: number, choice: "seal" | "expose" | "erase"): Promise<User | undefined>;
   getLeaderboard(): Promise<User[]>;
+  updateCustomization(id: number, item: string): Promise<User | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -34,11 +35,19 @@ export class DatabaseStorage implements IStorage {
     // Ensure we don't count the same game multiple times or go above 4
     const newCompletedGames = Math.max(user.completedGames, gameCompleted);
     
+    const rewards: Record<number, string> = {
+      1: "Apprentice Robes",
+      2: "Investigator's Cloak",
+      3: "Senior Inquisitor's Mantle",
+      4: "Master of Mysteries Raiment"
+    };
+
     const [updatedUser] = await db
       .update(users)
       .set({ 
         score: user.score + scoreAdded,
-        completedGames: newCompletedGames
+        completedGames: newCompletedGames,
+        unlockedItems: sql`array_append(unlocked_items, ${rewards[gameCompleted]})`
       })
       .where(eq(users.id, id))
       .returning();
@@ -82,6 +91,16 @@ export class DatabaseStorage implements IStorage {
     return updatedUser;
   }
 
+  
+    async updateCustomization(id: number, item: string): Promise<User | undefined> {
+      const [updatedUser] = await db
+        .update(users)
+        .set({ equippedItem: item })
+        .where(eq(users.id, id))
+        .returning();
+      return updatedUser;
+    }
+  
   async getLeaderboard(): Promise<User[]> {
     // Top 50 users by score
     return await db.select().from(users).orderBy(desc(users.score)).limit(50);

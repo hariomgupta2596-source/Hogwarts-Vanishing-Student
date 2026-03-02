@@ -75,6 +75,26 @@ export function useFinalChoice() {
   });
 }
 
+export function useUpdateCustomization() {
+  const { user, setUser } = useGameStore();
+  
+  return useMutation({
+    mutationFn: async (item: string) => {
+      if (!user) throw new Error("Not logged in");
+      const res = await fetch(`/api/users/${user.id}/customization`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item }),
+      });
+      if (!res.ok) throw new Error("Failed to update customization");
+      return res.json() as Promise<UserResponse>;
+    },
+    onSuccess: (updatedUser) => {
+      setUser(updatedUser);
+    }
+  });
+}
+
 export function useLeaderboard() {
   return useQuery({
     queryKey: [api.leaderboard.get.path],

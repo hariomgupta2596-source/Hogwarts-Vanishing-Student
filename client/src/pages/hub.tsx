@@ -1,15 +1,16 @@
 import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Lock, Unlock, Trophy, Compass, MapPin, LogOut } from "lucide-react";
+import { Lock, Unlock, Trophy, Compass, MapPin, LogOut, Shirt } from "lucide-react";
 import { useGameStore } from "@/lib/store";
 import { PageWrapper } from "@/components/PageWrapper";
+import { useUpdateCustomization } from "@/hooks/use-game";
 import entryBg from "@assets/Entry_Background_1772032172890.png";
 
 const NODES = [
-  { id: 1, title: "The Sorting Hat", desc: "Assign anomalous traits.", path: "/game/1" },
-  { id: 2, title: "Three Broomsticks", desc: "Reconstruct the torn receipt.", path: "/game/2" },
-  { id: 3, title: "Pensieve Paradox", desc: "Find the memory contradiction.", path: "/game/3" },
-  { id: 4, title: "Ministry Register", desc: "Locate the invisible student.", path: "/game/4" },
+  { id: 1, title: "The Sorting Hat", desc: "Assign anomalous traits.", path: "/game/1", reward: "Apprentice Robes" },
+  { id: 2, title: "Three Broomsticks", desc: "Reconstruct the torn receipt.", path: "/game/2", reward: "Investigator's Cloak" },
+  { id: 3, title: "Pensieve Paradox", desc: "Find the memory contradiction.", path: "/game/3", reward: "Senior Inquisitor's Mantle" },
+  { id: 4, title: "Ministry Register", desc: "Locate the invisible student.", path: "/game/4", reward: "Master of Mysteries Raiment" },
 ];
 
 export function Hub() {
@@ -17,6 +18,7 @@ export function Hub() {
   const logout = useGameStore(state => state.logout);
   const [, setLocation] = useLocation();
   const completedGames = user?.completedGames || 0;
+  const { mutate: updateCustomization } = useUpdateCustomization();
 
   if (!user) return null;
 
@@ -34,6 +36,10 @@ export function Hub() {
             </h1>
             <div className="flex items-center gap-4">
               <p className="font-serif text-muted-foreground">Investigator: <span className="text-foreground">{user.username}</span></p>
+              <div className="flex items-center gap-2 bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                <Shirt className="w-4 h-4 text-primary" />
+                <span className="text-xs font-display text-primary uppercase tracking-tighter">{user.equippedItem}</span>
+              </div>
               <button 
                 onClick={() => { logout(); setLocation("/login"); }}
                 className="text-destructive/70 hover:text-destructive transition-colors flex items-center gap-2 font-serif text-sm"
@@ -53,6 +59,34 @@ export function Hub() {
             </Link>
           </div>
         </header>
+
+        {/* Wardrobe Section */}
+        <div className="mb-12 relative z-10">
+          <h2 className="font-display text-2xl text-primary mb-4 flex items-center gap-2">
+            <Shirt className="w-6 h-6" /> Your Wardrobe
+          </h2>
+          <div className="flex flex-wrap gap-4">
+            <button
+              onClick={() => updateCustomization("Standard Robes")}
+              className={`px-4 py-2 rounded-xl border transition-all ${user.equippedItem === "Standard Robes" ? "bg-primary text-primary-foreground border-primary" : "bg-background/40 border-primary/20 text-muted-foreground hover:border-primary/50"}`}
+            >
+              Standard Robes
+            </button>
+            {NODES.map(node => {
+              const isUnlocked = user.completedGames >= node.id;
+              if (!isUnlocked) return null;
+              return (
+                <button
+                  key={node.reward}
+                  onClick={() => updateCustomization(node.reward)}
+                  className={`px-4 py-2 rounded-xl border transition-all ${user.equippedItem === node.reward ? "bg-primary text-primary-foreground border-primary box-glow" : "bg-background/40 border-primary/20 text-muted-foreground hover:border-primary/50"}`}
+                >
+                  {node.reward}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="relative max-w-3xl mx-auto py-10 z-10">
           <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-primary/50 via-primary/20 to-transparent -translate-x-1/2 z-0" />
@@ -76,7 +110,8 @@ export function Hub() {
                       glass-panel p-6 rounded-2xl transition-all duration-300
                       ${isUnlocked ? 'hover:box-glow hover:border-primary/50' : 'opacity-50 grayscale'}
                     `}>
-                      <h3 className="font-display text-xl text-foreground mb-2">{node.title}</h3>
+                      <h3 className="font-display text-xl text-foreground mb-1">{node.title}</h3>
+                      <p className="font-serif text-xs text-primary/70 uppercase tracking-widest mb-2">Reward: {node.reward}</p>
                       <p className="font-serif text-muted-foreground mb-4">{node.desc}</p>
                       
                       {isUnlocked ? (

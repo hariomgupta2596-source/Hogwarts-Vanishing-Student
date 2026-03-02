@@ -12,7 +12,9 @@ export const users = pgTable("users", {
   password: text("password").notNull().default(""),
   house: text("house").notNull().default("gryffindor"),
   startTime: timestamp("start_time").defaultNow(),
-  finalChoice: text("final_choice"), // 'seal', 'expose', 'erase'
+  finalChoice: text("final_choice"),
+  unlockedItems: text("unlocked_items").array().default([]).notNull(),
+  equippedItem: text("equipped_item").default("Standard Robes").notNull(), // 'seal', 'expose', 'erase'
   createdAt: timestamp("created_at").defaultNow(),
 });
 
