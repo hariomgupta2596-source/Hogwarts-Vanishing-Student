@@ -54,6 +54,17 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
+    updateCustomization: {
+      method: "POST" as const,
+      path: "/api/users/:id/customization" as const,
+      input: z.object({
+        item: z.string(),
+      }),
+      responses: {
+        200: z.custom<typeof users.$inferSelect>(),
+        404: errorSchemas.notFound,
+      },
+    },
   },
   leaderboard: {
     get: {
@@ -66,6 +77,7 @@ export const api = {
             username: z.string(),
             score: z.number(),
             finalChoice: z.string().nullable(),
+            equippedItem: z.string().optional(),
           })
         ),
       },

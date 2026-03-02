@@ -102,6 +102,19 @@ export async function registerRoutes(
     }
   });
 
+  // POST /api/users/:id/customization - Update character customization
+  app.post("/api/users/:id/customization", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { item } = req.body;
+      const updatedUser = await storage.updateCustomization(id, item);
+      if (!updatedUser) return res.status(404).json({ message: "User not found" });
+      return res.status(200).json(updatedUser);
+    } catch (err) {
+      return res.status(500).json({ message: "Failed to update customization" });
+    }
+  });
+
   // GET /api/leaderboard - Get top players
   app.get(api.leaderboard.get.path, async (req, res) => {
     try {
@@ -112,7 +125,8 @@ export async function registerRoutes(
         id: u.id,
         username: u.username,
         score: u.score,
-        finalChoice: u.finalChoice
+        finalChoice: u.finalChoice,
+        equippedItem: u.equippedItem
       }));
       
       return res.status(200).json(response);
