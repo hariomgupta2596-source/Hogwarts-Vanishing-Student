@@ -1,104 +1,211 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { GameLayout } from "@/components/GameLayout";
 import { useUpdateProgress } from "@/hooks/use-game";
 import { useGameStore } from "@/lib/store";
-import entryBg from "@assets/Entry_Background_1772032172890.png";
+import { Lock, Unlock, HelpCircle, FileText } from "lucide-react";
 
-const ANOMALIES = [
-  { id: 1, top: "25%", left: "45%", name: "Floating Quill" },
-  { id: 2, top: "65%", left: "20%", name: "Hidden Rune" },
-  { id: 3, top: "15%", left: "75%", name: "Silver Chalice" },
+const CODE = "042";
+const CLUES = [
+  { hint: "682", text: "One digit is correct and in the right place" },
+  { hint: "614", text: "One digit is correct but in the wrong place" },
+  { hint: "206", text: "Two digits are correct but in the wrong place" },
+  { hint: "738", text: "Nothing is correct" },
 ];
 
 export function Game2() {
-  const [found, setFound] = useState<number[]>([]);
+  const [phase, setStep] = useState<"lock" | "assemble" | "math">("lock");
+  const [inputCode, setInputCode] = useState(["", "", ""]);
+  const [mathAnswers, setMathAnswers] = useState({ q1: "", q2: "", q3: "" });
+  const [error, setError] = useState(false);
+  const [showHint, setShowHint] = useState(false);
+  
   const { mutate: updateProgress, isPending } = useUpdateProgress();
   const [, setLocation] = useLocation();
   const user = useGameStore(state => state.user);
 
-  const handlePointClick = (id: number) => {
-    if (!found.includes(id)) {
-      setFound([...found, id]);
+  const handleCodeChange = (idx: number, val: string) => {
+    if (!/^\d?$/.test(val)) return;
+    const newCode = [...inputCode];
+    newCode[idx] = val;
+    setInputCode(newCode);
+    if (newCode.join("") === CODE) {
+      setTimeout(() => setStep("assemble"), 500);
     }
   };
 
-  const isComplete = found.length === ANOMALIES.length;
-
-  const handleFinish = () => {
-    if (user && user.completedGames < 2) {
-      updateProgress({ scoreAdded: 100, gameCompleted: 2 }, {
-        onSuccess: () => setLocation("/hub")
-      });
+  const checkMath = () => {
+    if (mathAnswers.q1 === "2" && mathAnswers.q2 === "3" && mathAnswers.q3 === "7") {
+      if (user && user.completedGames < 2) {
+        updateProgress({ scoreAdded: 100, gameCompleted: 2 }, {
+          onSuccess: () => setLocation("/hub")
+        });
+      } else {
+        setLocation("/hub");
+      }
     } else {
-      setLocation("/hub");
+      setError(true);
+      setTimeout(() => setError(false), 2000);
     }
   };
 
   return (
-    <GameLayout title="The Hidden Evidence">
+    <GameLayout title="The Sealed Evidence">
       <div className="flex-1 flex flex-col items-center justify-center mt-4">
-        <p className="font-serif text-muted-foreground max-w-lg text-center mb-8 text-lg">
-          The Three Broomsticks archives contain hidden magical traces. Locate all 3 anomalies in the scene to proceed.
-        </p>
+        
+        <AnimatePresence mode="wait">
+          {phase === "lock" && (
+            <motion.div 
+              key="lock"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="max-w-md w-full"
+            >
+              <div className="glass-panel p-8 rounded-2xl text-center border-primary/30 box-glow">
+                <Lock className="w-16 h-16 text-primary mx-auto mb-6 animate-pulse" />
+                <h2 className="font-display text-2xl text-primary mb-6">Code Breaker</h2>
+                
+                <div className="space-y-4 mb-8">
+                  {CLUES.map((clue, i) => (
+                    <div key={i} className="flex items-center gap-4 text-left p-3 bg-primary/5 rounded-lg border border-primary/10">
+                      <span className="font-mono text-xl font-bold text-primary">{clue.hint}</span>
+                      <span className="font-serif text-sm text-muted-foreground">{clue.text}</span>
+                    </div>
+                  ))}
+                </div>
 
-        <div className="relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden border-4 border-primary/30 box-glow shadow-2xl bg-black">
-          <img 
-            src={entryBg} 
-            alt="Investigation Scene" 
-            className="w-full h-full object-cover opacity-80"
-          />
-          
-          {ANOMALIES.map((anomaly) => {
-            const isFound = found.includes(anomaly.id);
-            return (
-              <button
-                key={anomaly.id}
-                onClick={() => handlePointClick(anomaly.id)}
-                className={`absolute w-12 h-12 -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-500 ${
-                  isFound 
-                    ? "bg-primary/40 border-2 border-primary scale-125" 
-                    : "bg-transparent hover:bg-primary/10"
-                }`}
-                style={{ top: anomaly.top, left: anomaly.left }}
-              >
-                {isFound && (
-                  <motion.div 
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="w-full h-full flex items-center justify-center"
-                  >
-                    <div className="w-2 h-2 bg-primary rounded-full box-glow" />
-                  </motion.div>
-                )}
-              </button>
-            );
-          })}
-        </div>
+                <div className="flex justify-center gap-4 mb-6">
+                  {inputCode.map((digit, i) => (
+                    <input
+                      key={i}
+                      type="text"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleCodeChange(i, e.target.value)}
+                      className="w-16 h-20 bg-background/50 border-2 border-primary/30 rounded-xl text-center text-4xl font-display text-primary focus:border-primary focus:outline-none transition-all"
+                    />
+                  ))}
+                </div>
 
-        <div className="mt-8 flex flex-col items-center gap-4">
-          <div className="flex gap-4">
-            {ANOMALIES.map((a) => (
-              <div 
-                key={a.id}
-                className={`px-4 py-2 rounded-full border text-xs font-serif uppercase tracking-widest transition-all ${
-                  found.includes(a.id) ? "border-primary text-primary bg-primary/10" : "border-muted text-muted-foreground"
-                }`}
-              >
-                {a.name}
+                <button 
+                  onClick={() => setShowHint(true)}
+                  className="text-primary/60 hover:text-primary transition-colors flex items-center gap-2 mx-auto text-sm font-serif"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                  {showHint ? "Clue: 0 and 4 are the other digits" : "Need a hint?"}
+                </button>
               </div>
-            ))}
-          </div>
+            </motion.div>
+          )}
 
-          <button
-            onClick={handleFinish}
-            disabled={!isComplete || isPending}
-            className="mt-4 bg-primary text-primary-foreground px-12 py-4 rounded-xl font-display font-bold text-xl hover:bg-primary/90 transition-all disabled:opacity-50 hover:-translate-y-1 box-glow-strong"
-          >
-            {isPending ? "Recording Evidence..." : isComplete ? "Secure Evidence" : `Found ${found.length}/3`}
-          </button>
-        </div>
+          {phase === "assemble" && (
+            <motion.div 
+              key="assemble"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              onAnimationComplete={() => setTimeout(() => setStep("math"), 2500)}
+              className="relative w-full max-w-lg aspect-square flex items-center justify-center"
+            >
+              <Unlock className="absolute top-0 w-12 h-12 text-primary animate-bounce" />
+              {[...Array(12)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ 
+                    x: (Math.random() - 0.5) * 600, 
+                    y: (Math.random() - 0.5) * 600,
+                    rotate: Math.random() * 360,
+                    opacity: 0
+                  }}
+                  animate={{ x: 0, y: 0, rotate: 0, opacity: 1 }}
+                  transition={{ duration: 2, ease: "circOut", delay: i * 0.05 }}
+                  className="absolute w-24 h-24 bg-[#f4e4bc] border border-[#3a2f24]/20 shadow-lg"
+                  style={{ 
+                    clipPath: `polygon(${Math.random()*20}% 0%, ${80+Math.random()*20}% 0%, 100% ${80+Math.random()*20}%, 0% 100%)`,
+                    backgroundImage: 'url("https://www.transparenttextures.com/patterns/old-wall.png")'
+                  }}
+                />
+              ))}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.5 }}
+                className="font-display text-3xl text-primary text-glow"
+              >
+                Restoring Records...
+              </motion.div>
+            </motion.div>
+          )}
+
+          {phase === "math" && (
+            <motion.div 
+              key="math"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="max-w-md w-full"
+            >
+              <div className="bg-[#f4e4bc] text-[#3a2f24] p-10 rounded-sm shadow-2xl relative overflow-hidden font-serif" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/old-wall.png")' }}>
+                <div className="absolute top-0 left-0 w-full h-4 bg-background/80 blur-[2px]" style={{ clipPath: 'polygon(0% 0%, 5% 100%, 10% 0%, 15% 100%, 20% 0%, 25% 100%, 30% 0%, 35% 100%, 40% 0%, 45% 100%, 50% 0%, 55% 100%, 60% 0%, 65% 100%, 70% 0%, 75% 100%, 80% 0%, 85% 100%, 90% 0%, 95% 100%, 100% 0%)' }} />
+                <h2 className="font-display text-2xl text-center mb-8 border-b-2 border-[#3a2f24]/30 pb-4">Three Broomsticks</h2>
+                
+                <div className="space-y-6 text-xl">
+                  <div className="flex justify-between items-center border-b border-[#3a2f24]/10 pb-2">
+                    <span>Butterbeer (x2)</span>
+                    <div className="flex items-center gap-2">
+                      <span>@</span>
+                      <input 
+                        type="text" 
+                        value={mathAnswers.q1}
+                        onChange={(e) => setMathAnswers({...mathAnswers, q1: e.target.value})}
+                        className="w-8 h-8 bg-transparent border-b-2 border-[#3a2f24] text-center focus:outline-none" 
+                      />
+                      <span>S. = 4 S.</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center border-b border-[#3a2f24]/10 pb-2">
+                    <span>Pumpkin Pasty (x1)</span>
+                    <div className="flex items-center gap-2">
+                      <span>@ 3 S. = </span>
+                      <input 
+                        type="text" 
+                        value={mathAnswers.q2}
+                        onChange={(e) => setMathAnswers({...mathAnswers, q2: e.target.value})}
+                        className="w-8 h-8 bg-transparent border-b-2 border-[#3a2f24] text-center focus:outline-none" 
+                      />
+                      <span>S.</span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-4 font-bold text-2xl">
+                    <span>TOTAL:</span>
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="text" 
+                        value={mathAnswers.q3}
+                        onChange={(e) => setMathAnswers({...mathAnswers, q3: e.target.value})}
+                        className="w-12 h-10 bg-transparent border-b-2 border-[#3a2f24] text-center focus:outline-none" 
+                      />
+                      <span>Sickles</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 text-center">
+                {error && <p className="text-destructive font-serif mb-4">The math does not align.</p>}
+                <button
+                  onClick={checkMath}
+                  className="bg-primary text-primary-foreground px-12 py-4 rounded-xl font-display font-bold text-xl hover:bg-primary/90 transition-all box-glow"
+                >
+                  {isPending ? "Verifying..." : "Verify Record"}
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
       </div>
     </GameLayout>
   );

@@ -47,6 +47,10 @@ Preferred communication style: Simple, everyday language.
 
 ### Game Logic
 - 4 sequential mini-games, each unlocked after completing the previous one
+- Game 1: Alchemical Mixing (Logic puzzle)
+- Game 2: The Sealed Evidence (3-digit code breaker → receipt assembly animation → receipt math verification)
+- Game 3: The Pensieve Paradox (Visual memory slider)
+- Game 4: The Ministry Register (Wizard's Chess "Mate in One" → Ministry Register identity cross-reference)
 - Games are purely client-side logic puzzles; scores are submitted to the server on completion
 - Score values: Game 1 = 100, Game 2 = 100, Game 3 = 150, Game 4 = 200
 - Idempotent progress tracking: completing a game multiple times doesn't add extra score
