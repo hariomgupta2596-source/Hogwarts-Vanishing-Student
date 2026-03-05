@@ -42,7 +42,7 @@ export function Entry() {
                 <motion.div 
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
-                  transition={{ duration: 5, ease: [0.4, 0, 0.2, 1] }}
+                  transition={{ duration: 2, ease: [0.4, 0, 0.2, 1] }}
                   className="wand-progress"
                 />
                 <div className="magic-glow" />

@@ -29,7 +29,7 @@ export function Intro() {
 
   useEffect(() => {
     if (user) {
-      setLocation("/hub");
+      setLocation("/story");
     }
   }, [user, setLocation]);
 
@@ -47,7 +47,7 @@ export function Intro() {
     setHouse(selectedHouse);
     login({ username, password, house: selectedHouse }, {
       onSuccess: () => {
-        setLocation("/story");
+        setLocation("/hub");
       },
       onError: (error: any) => {
         toast({
