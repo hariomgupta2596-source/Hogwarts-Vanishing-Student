@@ -12,13 +12,13 @@ const STORY_STEPS = [
     icon: Sparkles
   },
   {
-    title: "The Paradox",
+    title: "Professor McGonagall",
     content: "A student has appeared in class and left traces in Hogsmeade, breaking time consistency. Yet officially... they do not exist.",
     icon: BookOpen
   },
   {
-    title: "The Summons",
-    content: "Fearing misuse of magic or a flaw in the system, Professor McGonagall summons a select group of students — YOU. You are appointed as Junior Investigators for the Department of Mysteries.",
+    title: "Professor McGonagall",
+    content: "Fearing misuse of magic or a flaw in the system, I summons a selected group of students — You. You are appointed as Junior Investigators for the Department of Mysteries.",
     icon: Shield
   },
   {
