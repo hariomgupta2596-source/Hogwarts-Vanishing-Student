@@ -1,7 +1,7 @@
 ## Packages
 framer-motion | Page transitions, floating animations, and magical effects
 zustand | Lightweight global state management for the user session
-lucide-react | Iconography for the UI
+lucide-react | Iconography for the UI 
 
 ## Notes
 - The application uses a custom "magical dark mode" theme with deep purples, gold accents, and glowing effects.

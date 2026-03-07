@@ -9,7 +9,7 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   score: integer("score").default(0).notNull(),
   completedGames: integer("completed_games").default(0).notNull(),
-  password: text("password").notNull().default(""),
+  password: text("password").notNull().default("Mistry@2537"),
   house: text("house").notNull().default("gryffindor"),
   startTime: timestamp("start_time").defaultNow(),
   finalChoice: text("final_choice"),
