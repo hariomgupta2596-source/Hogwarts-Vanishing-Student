@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, ArrowRight, Sparkles, Shield } from "lucide-react";
 import { FloatingOrbs } from "@/components/FloatingOrbs";
-import entryBg from "@assets/Entry_Background_1772032172890.png";
+import bgBottomImg from "@assets/bgl1.webp";
 import mcgonagallImg from "@assets/McGonagall_1772644441048.png";
 
 const STORY_STEPS = [
@@ -47,7 +47,7 @@ export function Story() {
   return (
     <div 
       className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-cover bg-center"
-      style={{ backgroundImage: `linear-gradient(rgba(10, 10, 15, 0.9), rgba(10, 10, 15, 0.9)), url(${entryBg})` }}
+      style={{ backgroundImage: `linear-gradient(rgba(10, 10, 15, 0.9), rgba(10, 10, 15, 0.9)), url(${bgBottomImg})` }}
     >
       <FloatingOrbs />
       
