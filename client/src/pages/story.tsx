@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, ArrowRight, Sparkles, Shield } from "lucide-react";
 import { FloatingOrbs } from "@/components/FloatingOrbs";
 import entryBg from "@assets/Entry_Background_1772032172890.png";
+import mcgonagallImg from "@assets/McGonagall_1772644441048.png";
 
 const STORY_STEPS = [
   {
@@ -14,12 +15,12 @@ const STORY_STEPS = [
   {
     title: "Professor McGonagall",
     content: "A student has appeared in class and left traces in Hogsmeade, breaking time consistency. Yet officially... they do not exist.",
-    icon: BookOpen
+    
   },
   {
     title: "Professor McGonagall",
     content: "Fearing misuse of magic or a flaw in the system, I summons a selected group of students — You. You are appointed as Junior Investigators for the Department of Mysteries.",
-    icon: Shield
+    
   },
   {
     title: "The Mission",
@@ -59,8 +60,13 @@ export function Story() {
           transition={{ duration: 0.5 }}
           className="glass-panel max-w-2xl w-full p-8 md:p-12 rounded-2xl relative z-10 box-glow flex flex-col items-center text-center"
         >
-          <div className="bg-background/50 p-4 rounded-full border border-primary/20 mb-8 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
-            <Icon className="w-10 h-10 text-primary animate-pulse" />
+          <div className="relative mb-8">
+            {/* <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" /> */}
+            <img 
+              src={mcgonagallImg} 
+              alt="Professor McGonagall" 
+              className="w-32 h-32 md:w-40 md:h-60 "
+            />
           </div>
 
           <h2 className="font-display text-primary/70 text-sm tracking-[0.3em] uppercase mb-4">{currentStory.title}</h2>
