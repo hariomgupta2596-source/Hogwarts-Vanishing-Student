@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, ArrowRight, Sparkles, Shield } from "lucide-react";
+import { BookOpen, ArrowRight, Sparkles, Shield, HelpCircle } from "lucide-react";
 import { FloatingOrbs } from "@/components/FloatingOrbs";
 import bgBottomImg from "@assets/bgl1.webp";
 import mcgonagallImg from "@assets/McGonagall_1772644441048.png";
@@ -49,6 +49,10 @@ export function Story() {
       className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-cover bg-center"
       style={{ backgroundImage: `linear-gradient(rgba(10, 10, 15, 0.9), rgba(10, 10, 15, 0.9)), url(${bgBottomImg})` }}
     >
+      <Link href="/guide" className="absolute top-8 right-8 text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif z-20">
+        <HelpCircle className="w-5 h-5" />
+        <span>Guide</span>
+      </Link>
       <FloatingOrbs />
       
       <AnimatePresence mode="wait">

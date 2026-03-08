@@ -6,7 +6,7 @@ import { useLocation } from "wouter";
 import { GameLayout } from "@/components/GameLayout";
 import { useUpdateProgress } from "@/hooks/use-game";
 import { useGameStore } from "@/lib/store";
-import { Eye, Search, Swords, Trophy, ChevronRight } from "lucide-react";
+import { Eye, Search, Swords, Trophy, ChevronRight, RotateCcw } from "lucide-react";
 import trait1 from "@assets/student_Traits_1.png";
 import trait3 from "@assets/student_Traits_3.png";
 import trait4 from "@assets/student_Traits_4.png";
@@ -15,7 +15,7 @@ const STAGES = [
   {
     id: "attendance",
     title: "Attendance Logs",
-    fen: "k1b5/p7/1P6/8/8/8/6K1/R7 w - - 0 1",
+    initialFen: "k1b5/p7/1P6/8/8/2B5/6K1/R7 w - - 0 1",
     solution: "Ra8",
     hint: "Move the Rook to a8 for checkmate",
     evidence: {
@@ -31,7 +31,7 @@ const STAGES = [
   {
     id: "traces",
     title: "Magical Traces",
-    fen: "8/8/2Q5/3B4/1K6/2P5/1k6/8 w - - 0 1",
+    initialFen: "8/8/2Q5/3B4/1K6/2P5/Nk6/2R5 w - - 0 1",
     solution: "Rc2",
     hint: "Move the Rook to c2 for checkmate",
     evidence: {
@@ -47,7 +47,7 @@ const STAGES = [
   {
     id: "identity",
     title: "Identity Status",
-    fen: "r4r2/pQ3ppp/2np4/2bk4/5P2/6P1/PPP5/R1B1KB1q w - - 0 1",
+    initialFen: "r4r2/pQ3ppp/2np4/2bk4/5P2/6P1/PPP5/R1B1KB1q w - - 0 1",
     solution: "Qf7",
     hint: "Move the Queen to f7 for checkmate",
     evidence: {
@@ -66,6 +66,7 @@ export function Game4() {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [unlockedStages, setUnlockedStages] = useState<string[]>([]);
   const [gameState, setGameState] = useState<{ [key: string]: any }>({});
+  const [moveCount, setMoveCount] = useState<{ [key: string]: number }>({});
   const [guess, setGuess] = useState("");
   const [guessError, setGuessError] = useState(false);
   
@@ -81,12 +82,29 @@ export function Game4() {
     if (!gameState[currentStage.id]) {
       setGameState(prev => ({
         ...prev,
-        [currentStage.id]: new Chess(currentStage.fen)
+        [currentStage.id]: new Chess(currentStage.initialFen)
+      }));
+      setMoveCount(prev => ({
+        ...prev,
+        [currentStage.id]: 0
       }));
     }
-  }, [currentStageIndex, currentStage.id, currentStage.fen, gameState]);
+  }, [currentStageIndex, currentStage.id, currentStage.initialFen, gameState]);
 
   const currentGame = gameState[currentStage.id];
+  const currentMoves = moveCount[currentStage.id] || 0;
+
+  const resetGame = () => {
+    const newGame = new Chess(currentStage.initialFen);
+    setGameState(prev => ({
+      ...prev,
+      [currentStage.id]: newGame
+    }));
+    setMoveCount(prev => ({
+      ...prev,
+      [currentStage.id]: 0
+    }));
+  };
 
   const makeMove = (source: string, target: string): boolean => {
     if (!currentGame) return false;
@@ -95,16 +113,29 @@ export function Game4() {
     const result = gameCopy.move({ from: source, to: target, promotion: "q" });
     
     if (!result) return false;
-    
+
+    // Check if this move leads to checkmate (restrict checkmate path)
+    if (gameCopy.isCheckmate()) {
+      // Checkmate in white's first move - unlock immediately
+      setUnlockedStages([...unlockedStages, currentStage.id]);
+      const newGameState = { ...gameState };
+      newGameState[currentStage.id] = gameCopy;
+      setGameState(newGameState);
+      setMoveCount(prev => ({
+        ...prev,
+        [currentStage.id]: (prev[currentStage.id] || 0) + 1
+      }));
+      return true;
+    }
+
+    // Update board
     const newGameState = { ...gameState };
     newGameState[currentStage.id] = gameCopy;
     setGameState(newGameState);
-
-    // Check if puzzle is solved (checkmate)
-    if (gameCopy.isCheckmate()) {
-      setUnlockedStages([...unlockedStages, currentStage.id]);
-      return true;
-    }
+    setMoveCount(prev => ({
+      ...prev,
+      [currentStage.id]: (prev[currentStage.id] || 0) + 1
+    }));
 
     // Auto-move for black
     setTimeout(() => {
@@ -116,6 +147,10 @@ export function Game4() {
         const newGameState2 = { ...gameState };
         newGameState2[currentStage.id] = gameCopy2;
         setGameState(newGameState2);
+        setMoveCount(prev => ({
+          ...prev,
+          [currentStage.id]: (prev[currentStage.id] || 0) + 1
+        }));
       }
     }, 500);
 
@@ -194,7 +229,16 @@ export function Game4() {
                 )}
               </div>
 
-              <p className="text-sm text-muted-foreground italic text-center">{currentStage.hint}</p>
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-sm text-muted-foreground italic">{currentStage.hint}</p>
+                <button
+                  onClick={resetGame}
+                  className="flex items-center gap-2 px-4 py-2 bg-background/50 border border-primary/30 rounded-lg hover:border-primary/60 transition-all text-primary font-serif text-sm"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Reset Board
+                </button>
+              </div>
             </motion.div>
           ) : (
             <motion.div

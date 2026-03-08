@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { GameLayout } from "@/components/GameLayout";
 import { useUpdateProgress } from "@/hooks/use-game";
 import { useGameStore } from "@/lib/store";
+import { HelpCircle } from "lucide-react";
 import trait1 from "@assets/student_Traits_1.png";
 import trait2 from "@assets/student_Traits_2.png";
 import trait3 from "@assets/student_Traits_3.png";
@@ -60,7 +61,10 @@ export function Game1() {
 
   return (
     <GameLayout title="The Sorting Hat Memory">
-      <div className="max-w-4xl mx-auto w-full grid md:grid-cols-2 gap-12 mt-8">
+      <div className="max-w-4xl mx-auto w-full grid md:grid-cols-2 gap-12 mt-8 relative">
+        <Link href="/guide" className="absolute top-0 right-0 z-20 text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif">
+          <HelpCircle className="w-5 h-5" />
+        </Link>
         
         {/* Left Column: Students */}
         <div className="space-y-4 ">

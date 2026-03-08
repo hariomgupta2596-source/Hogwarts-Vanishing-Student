@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { GameLayout } from "@/components/GameLayout";
 import { useFinalChoice } from "@/hooks/use-game";
-import { Shield, Eye, Trash2 } from "lucide-react";
+import { Shield, Eye, Trash2, HelpCircle } from "lucide-react";
 
 import { useGameStore } from "@/lib/store";
 
@@ -53,8 +53,12 @@ export function Verdict() {
   ];
 
   return (
-    <GameLayout title="The Final Verdict">
-      <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full mt-4">
+    <>
+      <Link href="/guide" className="absolute top-8 right-8 z-20 text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif">
+        <HelpCircle className="w-5 h-5" />
+      </Link>
+      <GameLayout title="The Final Verdict">
+        <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full mt-4">
         
         <h2 className="font-display text-3xl md:text-5xl text-foreground mb-6 text-center leading-tight">
           The truth has been uncovered. <br/>
@@ -101,3 +105,4 @@ export function Verdict() {
     </GameLayout>
   );
 }
+    </>
