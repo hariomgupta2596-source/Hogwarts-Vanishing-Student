@@ -53,10 +53,6 @@ export function Verdict() {
   ];
 
   return (
-    <>
-      <Link href="/guide" className="absolute top-8 right-8 z-20 text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif">
-        <HelpCircle className="w-5 h-5" />
-      </Link>
       <GameLayout title="The Final Verdict">
         <div className="flex-1 flex flex-col items-center justify-center max-w-4xl mx-auto w-full mt-4">
         
@@ -105,4 +101,4 @@ export function Verdict() {
     </GameLayout>
   );
 }
-    </>
+    

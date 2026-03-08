@@ -8,8 +8,10 @@ import { useUpdateProgress } from "@/hooks/use-game";
 import { useGameStore } from "@/lib/store";
 import { Eye, Search, Swords, Trophy, ChevronRight, RotateCcw } from "lucide-react";
 import trait1 from "@assets/student_Traits_1.png";
+import trait2 from "@assets/student_Traits_2.png";
 import trait3 from "@assets/student_Traits_3.png";
 import trait4 from "@assets/student_Traits_4.png";
+
 
 const STAGES = [
   {
@@ -17,13 +19,13 @@ const STAGES = [
     title: "Attendance Logs",
     initialFen: "k1b5/p7/1P6/8/8/2B5/6K1/R7 w - - 0 1",
     solution: "Ra8",
-    hint: "Move the Rook to a8 for checkmate",
+    hint: "Move the Rook to a7 for checkmate",
     evidence: {
       directive: "The vanished student must have been marked Present.",
       data: [
         { name: "Cedric D.", status: "Present", image: trait3 },
-        { name: "Unknown", status: "Present", image: trait1 },
-        { name: "Draco M.", status: "Absent", image: trait1 },
+        { name: "Arthur V.", status: "Present", image: trait1 },
+        { name: "Draco M.", status: "Absent", image: trait2 },
         { name: "Luna L.", status: "Present", image: trait4 },
       ]
     }
@@ -31,15 +33,15 @@ const STAGES = [
   {
     id: "traces",
     title: "Magical Traces",
-    initialFen: "8/8/2Q5/3B4/1K6/2P5/Nk6/2R5 w - - 0 1",
-    solution: "Rc2",
-    hint: "Move the Rook to c2 for checkmate",
+    initialFen: "6k1/5ppp/5Q2/8/3P4/8/q1rK1P1P w - - 0 1",
+    solution: "Qf7",
+    hint: "Move the Queen to f7 for checkmate",
     evidence: {
       directive: "The vanished student left High magical traces.",
       data: [
         { name: "Cedric D.", status: "None", image: trait3 },
-        { name: "Unknown", status: "High", image: trait1 },
-        { name: "Draco M.", status: "High", image: trait1 },
+        { name: "Arthur V.", status: "High", image: trait1 },
+        { name: "Draco M.", status: "High", image: trait2 },
         { name: "Luna L.", status: "Low", image: trait4 },
       ]
     }
@@ -54,8 +56,8 @@ const STAGES = [
       directive: "The vanished student's identity will be Missing.",
       data: [
         { name: "Cedric D.", status: "Verified", image: trait3 },
-        { name: "Unknown", status: "Missing", image: trait1 },
-        { name: "Draco M.", status: "Verified", image: trait1 },
+        { name: "Arthur V.", status: "Missing", image: trait1 },
+        { name: "Draco M.", status: "Verified", image: trait2 },
         { name: "Luna L.", status: "Verified", image: trait4 },
       ]
     }
@@ -84,16 +86,15 @@ export function Game4() {
         ...prev,
         [currentStage.id]: new Chess(currentStage.initialFen)
       }));
-      setMoveCount(prev => ({
-        ...prev,
-        [currentStage.id]: 0
-      }));
-    }
-  }, [currentStageIndex, currentStage.id, currentStage.initialFen, gameState]);
+    setMoveCount(prev => ({
+          ...prev,
+          [currentStage.id]: 0
+        }));
+      }
+    }, [currentStageIndex, currentStage.id, currentStage.initialFen, gameState]);
 
   const currentGame = gameState[currentStage.id];
   const currentMoves = moveCount[currentStage.id] || 0;
-
   const resetGame = () => {
     const newGame = new Chess(currentStage.initialFen);
     setGameState(prev => ({
@@ -110,56 +111,70 @@ export function Game4() {
     if (!currentGame) return false;
     
     const gameCopy = new Chess(currentGame.fen());
-    const result = gameCopy.move({ from: source, to: target, promotion: "q" });
+    try {
+      const result = gameCopy.move({ 
+        from: source, 
+        to: target, 
+        promotion: "q" // always promote to queen for simplicity
+      });
     
     if (!result) return false;
-
+    
     // Check if this move leads to checkmate (restrict checkmate path)
     if (gameCopy.isCheckmate()) {
-      // Checkmate in white's first move - unlock immediately
-      setUnlockedStages([...unlockedStages, currentStage.id]);
-      const newGameState = { ...gameState };
-      newGameState[currentStage.id] = gameCopy;
-      setGameState(newGameState);
-      setMoveCount(prev => ({
-        ...prev,
-        [currentStage.id]: (prev[currentStage.id] || 0) + 1
-      }));
-      return true;
-    }
-
-    // Update board
-    const newGameState = { ...gameState };
-    newGameState[currentStage.id] = gameCopy;
-    setGameState(newGameState);
-    setMoveCount(prev => ({
-      ...prev,
-      [currentStage.id]: (prev[currentStage.id] || 0) + 1
-    }));
-
-    // Auto-move for black
-    setTimeout(() => {
-      const gameCopy2 = new Chess(gameCopy.fen());
-      const moves = gameCopy2.moves({ verbose: true });
-      if (moves.length > 0) {
-        const randomMove = moves[Math.floor(Math.random() * moves.length)];
-        gameCopy2.move(randomMove);
-        const newGameState2 = { ...gameState };
-        newGameState2[currentStage.id] = gameCopy2;
-        setGameState(newGameState2);
+        // Checkmate in white's first move - unlock immediately
+        setUnlockedStages([...unlockedStages, currentStage.id]);
+        const newGameState = { ...gameState };
+        newGameState[currentStage.id] = gameCopy;
+        setGameState(newGameState);
         setMoveCount(prev => ({
           ...prev,
           [currentStage.id]: (prev[currentStage.id] || 0) + 1
         }));
+        return true;
       }
-    }, 500);
+      // Update board
 
-    return true;
-  };
+      
+    const newGameState = { ...gameState };
+    newGameState[currentStage.id] = gameCopy;
+    setGameState(newGameState);
+
+    setMoveCount(prev => ({
+        ...prev,
+        [currentStage.id]: (prev[currentStage.id] || 0) + 1
+    }));
+
+    // Auto-move for black
+      if (!gameCopy.isGameOver()) {
+          setTimeout(() => {
+            const gameCopy2 = new Chess(gameCopy.fen());
+            const moves = gameCopy2.moves();
+            if (moves.length > 0) {
+              // AI makes a random move
+              gameCopy2.move(moves[Math.floor(Math.random() * moves.length)]);
+              const finalState = { ...gameState };
+              finalState[currentStage.id] = gameCopy2;
+              setGameState(finalState);
+              setMoveCount(prev => ({
+                ...prev,
+                [currentStage.id]: (prev[currentStage.id] || 0) + 1
+              }));
+            }
+          }, 500);
+        }
+
+        return true;
+      }catch (error) {
+        // Catch-all for any unexpected chess.js logic errors
+        console.error("Chess move error:", error);
+        return false;
+      }
+    };
 
   const handleFinalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (guess.trim().toLowerCase() === "unknown") {
+    if (guess.trim().toLowerCase() === "arthur v.") {
       if (user && user.completedGames < 4) {
         updateProgress({ scoreAdded: 200, gameCompleted: 4 }, {
           onSuccess: () => setLocation("/hub")
@@ -266,7 +281,7 @@ export function Game4() {
                     <div key={idx} className="grid grid-cols-2 gap-4 p-6 transition-all font-serif text-lg">
                       <div className="flex items-center gap-4">
                         <img src={row.image} className="w-10 h-14 object-cover rounded border border-primary/20 shadow-sm" alt="" />
-                        <span className={row.name === "Unknown" ? "blur-[3px] hover:blur-none transition-all cursor-help" : ""}>{row.name}</span>
+                        <span className={row.name === "Arthur V." ? "blur-[3px] hover:blur-none transition-all cursor-help" : ""}>{row.name}</span>
                       </div>
                       <div className="flex items-center text-primary/90">{row.status}</div>
                     </div>
