@@ -15,12 +15,14 @@ import { Game3 } from "./pages/game3";
 import { Game4 } from "./pages/game4";
 import { Verdict } from "./pages/verdict";
 import { Leaderboard } from "./pages/leaderboard";
+import { Guide } from "./pages/guide";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Entry} />
       <Route path="/login" component={Intro} />
+      <Route path="/guide" component={Guide} />
       <Route path="/story" component={Story} />
       <Route path="/hub" component={Hub} />
       <Route path="/game/1" component={Game1} />

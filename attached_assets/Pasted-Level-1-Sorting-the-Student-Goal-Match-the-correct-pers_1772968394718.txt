@@ -1,0 +1,48 @@
+Level 1 – Sorting the Student
+🎯 Goal: Match the correct personality profile to the correct Hogwarts house.
+What to Do
+Read each profile fragment carefully.
+Think about which Hogwarts house best matches those personality traits.
+Select the correct house button below.
+Repeat this process until all profiles are correctly assigned.
+
+Level 2 – Code Breaker and fix the receipt 
+🎯 Goal: Discover the correct 3-digit secret code by analyzing the clues. Complete the receipt using math and logic.
+What to Do
+Look at each number combination and the hint written beside it.
+Use logic to figure out which digits belong in the code.
+Pay attention to the clues:
+Eliminate impossible numbers step by step.
+Enter the correct 3-digit code in the boxes.
+What to Do
+Look carefully at the Three Broomsticks receipt.
+Check the price of each item.
+Calculate the correct cost for each item.
+Fill in the missing numbers so the math becomes correct.
+How to Think
+Multiply the quantity × price of each item.
+Add the results together.
+And Find the receipt total.
+
+Level 4 – The Pensieve Paradox
+🎯 Goal: Find the memory that does not belong.
+What to Do
+Read the memories shown in the Pensieve carefully.
+Use the left and right arrows to view all memories.
+Look for a memory that contains a mistake or logical inconsistency.
+Compare the times, locations, and events in each memory.
+When you find the incorrect memory, select Identify Paradox.
+Think logically about the timeline.
+
+Level 5 – Wizard’s Chess Security & Identify the Vanishing Student.
+🎯 Goal: Deliver checkmate in two move to bypass the magical chess defense for each clue. Find the student who matches the investigation directive.
+What to Do
+Look carefully at the chessboard and the positions of the pieces.
+It is White’s turn to move.
+Think about how to attack the Black King.
+Find the two move that puts the king in checkmate.
+Read the Directive carefully at the top.
+The vanished student must meet all three conditions:
+Marked Present in attendance
+Left High magical traces
+Identity status marked as Missing.

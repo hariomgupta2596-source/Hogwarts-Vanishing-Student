@@ -1,7 +1,7 @@
 import { useLeaderboard } from "@/hooks/use-game";
 import { PageWrapper } from "@/components/PageWrapper";
 import { Link } from "wouter";
-import { ArrowLeft, Trophy, Medal } from "lucide-react";
+import { ArrowLeft, Trophy, Medal, HelpCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 export function Leaderboard() {
@@ -10,9 +10,14 @@ export function Leaderboard() {
   return (
     <PageWrapper requireAuth={false}>
       <header className="flex flex-col items-center mb-12 relative z-10">
-        <Link href="/hub" className="absolute left-0 top-2 text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif">
-          <ArrowLeft className="w-5 h-5" /> Back
-        </Link>
+        <div className="absolute left-0 top-2 flex gap-4">
+          <Link href="/hub" className="text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif">
+            <ArrowLeft className="w-5 h-5" /> Back
+          </Link>
+          <Link href="/guide" className="text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif">
+            <HelpCircle className="w-5 h-5" /> Guide
+          </Link>
+        </div>
         <Trophy className="w-16 h-16 text-primary mb-4 text-glow" />
         <h1 className="font-display text-4xl text-primary text-glow">Wizengamot Archives</h1>
         <p className="font-serif text-muted-foreground mt-2">Top Investigators and their final decrees.</p>

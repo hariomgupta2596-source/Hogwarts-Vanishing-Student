@@ -4,12 +4,16 @@ import { useLocation } from "wouter";
 import { GameLayout } from "@/components/GameLayout";
 import { useUpdateProgress } from "@/hooks/use-game";
 import { useGameStore } from "@/lib/store";
+import trait1 from "@assets/student_Traits_1.png";
+import trait2 from "@assets/student_Traits_2.png";
+import trait3 from "@assets/student_Traits_3.png";
+import trait4 from "@assets/student_Traits_4.png";
 
 const STUDENTS = [
-  { id: 1, traits: "Ambitious, cunning, resourceful", correctHouse: "Slytherin" },
-  { id: 2, traits: "Brave, fiercely loyal, reckless", correctHouse: "Gryffindor" },
-  { id: 3, traits: "Patient, fair, hard-working", correctHouse: "Hufflepuff" },
-  { id: 4, traits: "Analytical, curious, observant", correctHouse: "Ravenclaw" },
+  { id: 1, traits: trait1, correctHouse: "Slytherin" },
+  { id: 2, traits: trait2, correctHouse: "Gryffindor" },
+  { id: 3, traits: trait3, correctHouse: "Hufflepuff" },
+  { id: 4, traits: trait4, correctHouse: "Ravenclaw" },
 ];
 
 const HOUSES = [
@@ -59,26 +63,34 @@ export function Game1() {
       <div className="max-w-4xl mx-auto w-full grid md:grid-cols-2 gap-12 mt-8">
         
         {/* Left Column: Students */}
-        <div className="space-y-4">
+        <div className="space-y-4 ">
           <h2 className="font-display text-xl text-primary/80 mb-6">Select a profile fragment:</h2>
+          <div className="grid grid-cols-2 gap-4">
           {STUDENTS.map((student) => (
             <motion.div
               key={student.id}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedStudent(student.id)}
-              className={`
-                p-6 rounded-xl cursor-pointer border-2 transition-all duration-300
+              className={` flex-1 flex items-center justify-center 
+                p-4 rounded-xl cursor-pointer border-0 transition-all duration-300
                 ${selectedStudent === student.id ? 'border-primary bg-primary/10 box-glow' : 'border-primary/20 bg-card hover:bg-card/80'}
                 ${assignments[student.id] ? 'opacity-50 grayscale' : ''}
               `}
             >
-              <p className="font-serif text-lg text-foreground italic">"{student.traits}"</p>
+              {/* REPLACED: Traits text is gone. Image is added here. */}
+              <img 
+                src={student.traits} 
+                alt={`Student Profile Fragment ${student.id}`} 
+                className="w-full h-auto rounded-lg"
+              />
+
               {assignments[student.id] && (
-                <div className="mt-2 text-sm font-display text-primary/70">Assigned to: {assignments[student.id]}</div>
+                <div className="mt-2 text-sm font-display text-primary/70 text-center">Assigned to: {assignments[student.id]}</div>
               )}
             </motion.div>
           ))}
+          </div>
         </div>
 
         {/* Right Column: Houses */}

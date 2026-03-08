@@ -5,11 +5,12 @@ import { GameLayout } from "@/components/GameLayout";
 import { useUpdateProgress } from "@/hooks/use-game";
 import { useGameStore } from "@/lib/store";
 import { Lock, Unlock, HelpCircle, FileText } from "lucide-react";
+import receiptBg from "@assets/recipt_bg.jpg";
 
-const CODE = "042";
+const CODE = "052";
 const CLUES = [
   { hint: "682", text: "One digit is correct and in the right place" },
-  { hint: "614", text: "One digit is correct but in the wrong place" },
+  { hint: "615", text: "One digit is correct but in the wrong place" },
   { hint: "206", text: "Two digits are correct but in the wrong place" },
   { hint: "738", text: "Nothing is correct" },
 ];
@@ -52,7 +53,12 @@ export function Game2() {
 
   return (
     <GameLayout title="The Sealed Evidence">
-      <div className="flex-1 flex flex-col items-center justify-center mt-4">
+      <div 
+        className="flex-1 flex flex-col items-center justify-center mt-4 min-h-[80vh] w-full bg-cover bg-center bg-no-repeat rounded-3xl relative overflow-hidden"
+        style={{ 
+          backgroundImage: `linear-gradient(rgba(10, 10, 15, 0.8), rgba(10, 10, 15, 0.8)), url(${receiptBg})` 
+        }}
+      >
         
         <AnimatePresence mode="wait">
           {phase === "lock" && (
@@ -94,7 +100,7 @@ export function Game2() {
                   className="text-primary/60 hover:text-primary transition-colors flex items-center gap-2 mx-auto text-sm font-serif"
                 >
                   <HelpCircle className="w-4 h-4" />
-                  {showHint ? "Clue: 0 and 4 are the other digits" : "Need a hint?"}
+                  {showHint ? "Clue: 0 and 5 are the other digits" : "Need a hint?"}
                 </button>
               </div>
             </motion.div>
@@ -123,7 +129,7 @@ export function Game2() {
                   className="absolute w-24 h-24 bg-[#f4e4bc] border border-[#3a2f24]/20 shadow-lg"
                   style={{ 
                     clipPath: `polygon(${Math.random()*20}% 0%, ${80+Math.random()*20}% 0%, 100% ${80+Math.random()*20}%, 0% 100%)`,
-                    backgroundImage: 'url("https://www.transparenttextures.com/patterns/old-wall.png")'
+                     backgroundImage: 'url("https://www.transparenttextures.com/patterns/old-wall.png")'
                   }}
                 />
               ))}

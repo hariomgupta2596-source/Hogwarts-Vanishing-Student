@@ -1,26 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Chess } from "chess.js";
+import { Chessboard } from "react-chessboard";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { GameLayout } from "@/components/GameLayout";
 import { useUpdateProgress } from "@/hooks/use-game";
 import { useGameStore } from "@/lib/store";
 import { Eye, Search, Swords, Trophy, ChevronRight } from "lucide-react";
-import trait1 from "@assets/student_Traits_1_1772644599719.png";
-import trait2 from "@assets/student_Traits_2_1772644599720.png";
-import trait3 from "@assets/student_Traits_3_1772644599720.png";
-import trait4 from "@assets/student_Traits_4_1772644599721.png";
-import videoFrame from "@assets/video-frame_1772644599722.webp";
-import chessPuzzle1 from "@assets/chess-puzle-1_1772801394769.png";
-import chessPuzzle2 from "@assets/chess-puzle-2_1772801411387.png";
-import chessPuzzle3 from "@assets/chess-puzle-3_1772802579355.png";
+import trait1 from "@assets/student_Traits_1.png";
+import trait3 from "@assets/student_Traits_3.png";
+import trait4 from "@assets/student_Traits_4.png";
 
 const STAGES = [
   {
     id: "attendance",
     title: "Attendance Logs",
-    puzzle: chessPuzzle1,
+    fen: "k1b5/p7/1P6/8/8/8/6K1/R7 w - - 0 1",
     solution: "Ra8",
-    hint: "Checkmate in two: Start with the Rook to a8",
+    hint: "Move the Rook to a8 for checkmate",
     evidence: {
       directive: "The vanished student must have been marked Present.",
       data: [
@@ -34,9 +31,9 @@ const STAGES = [
   {
     id: "traces",
     title: "Magical Traces",
-    puzzle: chessPuzzle2,
+    fen: "8/8/2Q5/3B4/1K6/2P5/1k6/8 w - - 0 1",
     solution: "Rc2",
-    hint: "Checkmate in two: Force the king with Rook to c2",
+    hint: "Move the Rook to c2 for checkmate",
     evidence: {
       directive: "The vanished student left High magical traces.",
       data: [
@@ -50,9 +47,9 @@ const STAGES = [
   {
     id: "identity",
     title: "Identity Status",
-    puzzle: chessPuzzle3,
+    fen: "r4r2/pQ3ppp/2np4/2bk4/5P2/6P1/PPP5/R1B1KB1q w - - 0 1",
     solution: "Qf7",
-    hint: "Checkmate in two: Queen to f7 is the key",
+    hint: "Move the Queen to f7 for checkmate",
     evidence: {
       directive: "The vanished student's identity will be Missing.",
       data: [
@@ -68,8 +65,7 @@ const STAGES = [
 export function Game4() {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [unlockedStages, setUnlockedStages] = useState<string[]>([]);
-  const [chessInput, setChessInput] = useState("");
-  const [chessError, setChessError] = useState(false);
+  const [gameState, setGameState] = useState<{ [key: string]: any }>({});
   const [guess, setGuess] = useState("");
   const [guessError, setGuessError] = useState(false);
   
@@ -80,16 +76,50 @@ export function Game4() {
   const currentStage = STAGES[currentStageIndex];
   const isUnlocked = unlockedStages.includes(currentStage.id);
 
-  const handleChessSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (chessInput.trim().toLowerCase() === currentStage.solution.toLowerCase()) {
-      setUnlockedStages([...unlockedStages, currentStage.id]);
-      setChessInput("");
-      setChessError(false);
-    } else {
-      setChessError(true);
-      setTimeout(() => setChessError(false), 1500);
+  // Initialize chess game for current stage
+  useEffect(() => {
+    if (!gameState[currentStage.id]) {
+      setGameState(prev => ({
+        ...prev,
+        [currentStage.id]: new Chess(currentStage.fen)
+      }));
     }
+  }, [currentStageIndex, currentStage.id, currentStage.fen, gameState]);
+
+  const currentGame = gameState[currentStage.id];
+
+  const makeMove = (source: string, target: string): boolean => {
+    if (!currentGame) return false;
+    
+    const gameCopy = new Chess(currentGame.fen());
+    const result = gameCopy.move({ from: source, to: target, promotion: "q" });
+    
+    if (!result) return false;
+    
+    const newGameState = { ...gameState };
+    newGameState[currentStage.id] = gameCopy;
+    setGameState(newGameState);
+
+    // Check if puzzle is solved (checkmate)
+    if (gameCopy.isCheckmate()) {
+      setUnlockedStages([...unlockedStages, currentStage.id]);
+      return true;
+    }
+
+    // Auto-move for black
+    setTimeout(() => {
+      const gameCopy2 = new Chess(gameCopy.fen());
+      const moves = gameCopy2.moves({ verbose: true });
+      if (moves.length > 0) {
+        const randomMove = moves[Math.floor(Math.random() * moves.length)];
+        gameCopy2.move(randomMove);
+        const newGameState2 = { ...gameState };
+        newGameState2[currentStage.id] = gameCopy2;
+        setGameState(newGameState2);
+      }
+    }, 500);
+
+    return true;
   };
 
   const handleFinalSubmit = (e: React.FormEvent) => {
@@ -142,40 +172,29 @@ export function Game4() {
                 <div>
                   <h3 className="font-display text-lg text-primary mb-1">Security Protocol: Stage {currentStageIndex + 1}</h3>
                   <p className="font-serif text-muted-foreground">
-                    Bypass the Chess Security to unlock the <strong>{currentStage.title}</strong> evidence.
-                    <span className="text-foreground font-bold ml-1 text-primary">Checkmate in two moves.</span>
+                    Bypass the Wizard's Chess defense to unlock the <strong>{currentStage.title}</strong> evidence.
+                    <span className="text-foreground font-bold ml-1 text-primary">Checkmate in two moves. White to move.</span>
                   </p>
                 </div>
               </div>
 
-              <div className="relative p-4 mb-8 max-w-2xl w-full">
-                <img src={videoFrame} className="absolute inset-0 w-full h-full object-fill pointer-events-none z-10" alt="" />
-                <div className="relative z-0 rounded-lg overflow-hidden border-2 border-primary/40">
-                  <img src={currentStage.puzzle} alt="Chess Puzzle" className="w-full h-auto" />
-                </div>
+              <div className="flex justify-center mb-8">
+                {currentGame && (
+                  <Chessboard
+                    position={currentGame.fen()}
+                    onPieceDrop={(source, target) => makeMove(source, target)}
+                    boardWidth={380}
+                    customBoardStyle={{
+                      borderRadius: "10px",
+                      boxShadow: "0 0 30px rgba(212, 175, 55, 0.4)"
+                    }}
+                    customDarkSquareStyle={{ backgroundColor: "#3b2f14" }}
+                    customLightSquareStyle={{ backgroundColor: "#e5c76b" }}
+                  />
+                )}
               </div>
 
-              <form onSubmit={handleChessSubmit} className="flex flex-col items-center gap-4 w-full max-w-sm">
-                <div className="flex gap-2 w-full">
-                  <input
-                    type="text"
-                    value={chessInput}
-                    onChange={(e) => setChessInput(e.target.value)}
-                    placeholder="Enter winning move (e.g. Ra8)"
-                    className="flex-1 bg-background/50 border-2 border-primary/30 rounded-xl px-4 py-3 font-mono text-primary focus:border-primary focus:outline-none transition-all"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-primary text-primary-foreground px-6 py-3 rounded-xl font-display font-bold hover:bg-primary/90 transition-all box-glow"
-                  >
-                    Unlock
-                  </button>
-                </div>
-                {chessError && (
-                  <p className="text-destructive font-serif animate-bounce">Incorrect move sequence.</p>
-                )}
-                <p className="text-xs text-muted-foreground italic">Hint: {currentStage.hint}</p>
-              </form>
+              <p className="text-sm text-muted-foreground italic text-center">{currentStage.hint}</p>
             </motion.div>
           ) : (
             <motion.div
