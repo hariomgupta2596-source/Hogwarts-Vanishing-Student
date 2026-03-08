@@ -2,6 +2,7 @@ import { PageWrapper } from "@/components/PageWrapper";
 import { Link } from "wouter";
 import { ArrowLeft, Book, Target, Brain, Search, Swords } from "lucide-react";
 import { motion } from "framer-motion";
+import bgImage from "@assets/bgl1.png";
 
 const LEVELS = [
   {
@@ -66,10 +67,15 @@ const LEVELS = [
 
 export function Guide() {
   return (
+    <div 
+      className="min-h-screen bg-cover bg-fixed bg-center"
+      style={{ backgroundImage: `linear-gradient(rgba(10, 10, 15, 0.9), rgba(10, 10, 15, 0.9)), url(${bgImage})` }}
+    >
     <PageWrapper requireAuth={false}>
+      
       <header className="flex flex-col items-center mb-12 relative z-10">
-        <Link href="/login" className="absolute left-0 top-2 text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif">
-          <ArrowLeft className="w-5 h-5" /> Back to Login
+        <Link href="/hub" className="absolute left-0 top-2 text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif">
+          <ArrowLeft className="w-5 h-5" /> Back
         </Link>
         <Book className="w-16 h-16 text-primary mb-4 text-glow" />
         <h1 className="font-display text-4xl text-primary text-glow">How to Play</h1>
@@ -132,6 +138,8 @@ export function Guide() {
           </Link>
         </motion.div>
       </div>
+    
     </PageWrapper>
+    </div>
   );
 }

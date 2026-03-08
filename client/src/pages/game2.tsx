@@ -1,14 +1,5 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLocation } from "wouter";
-import { GameLayout } from "@/components/GameLayout";
-import { useUpdateProgress } from "@/hooks/use-game";
-import { useGameStore } from "@/lib/store";
-import { Lock, Unlock, HelpCircle, FileText } from "lucide-react";
-import receiptBg from "@assets/recipt_bg.jpg";
-
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, Link } from "wouter";
 import { GameLayout } from "@/components/GameLayout";
 import { useUpdateProgress } from "@/hooks/use-game";
@@ -61,9 +52,13 @@ export function Game2() {
   };
 
   return (
-    <>
+    <GameLayout title="The Sealed Evidence">
+        
       <Link href="/guide" className="absolute top-8 right-8 z-20 text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif">
         <HelpCircleIcon className="w-5 h-5" />
+        <span>Guide</span>
+      </Link>
+        <div className="flex-1 flex flex-col items-center justify-center mt-4"
         style={{ 
           backgroundImage: `linear-gradient(rgba(10, 10, 15, 0.8), rgba(10, 10, 15, 0.8)), url(${receiptBg})` 
         }}
@@ -108,7 +103,7 @@ export function Game2() {
                   onClick={() => setShowHint(true)}
                   className="text-primary/60 hover:text-primary transition-colors flex items-center gap-2 mx-auto text-sm font-serif"
                 >
-                  <HelpCircle className="w-4 h-4" />
+                  <HelpCircleIcon className="w-4 h-4" />
                   {showHint ? "Clue: 0 and 5 are the other digits" : "Need a hint?"}
                 </button>
               </div>

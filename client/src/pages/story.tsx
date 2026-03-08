@@ -3,7 +3,7 @@ import { useLocation, Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, ArrowRight, Sparkles, Shield, HelpCircle } from "lucide-react";
 import { FloatingOrbs } from "@/components/FloatingOrbs";
-import bgBottomImg from "@assets/bgl1.webp";
+import bgBottomImg from "@assets/bgl1.png";
 import mcgonagallImg from "@assets/McGonagall_1772644441048.png";
 
 const STORY_STEPS = [

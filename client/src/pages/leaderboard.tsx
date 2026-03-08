@@ -3,11 +3,16 @@ import { PageWrapper } from "@/components/PageWrapper";
 import { Link } from "wouter";
 import { ArrowLeft, Trophy, Medal, HelpCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import bgImage from "@assets/beg.jpg";
 
 export function Leaderboard() {
   const { data, isLoading } = useLeaderboard();
 
   return (
+    <div 
+      className="min-h-screen bg-cover bg-fixed bg-center"
+      style={{ backgroundImage: `linear-gradient(rgba(10, 10, 15, 0.9), rgba(10, 10, 15, 0.9)), url(${bgImage})` }}
+    >
     <PageWrapper requireAuth={false}>
       <header className="flex flex-col items-center mb-12 relative z-10">
         <div className="absolute left-0 top-2 flex gap-4">
@@ -82,5 +87,6 @@ export function Leaderboard() {
         )}
       </div>
     </PageWrapper>
+    </div>
   );
 }
