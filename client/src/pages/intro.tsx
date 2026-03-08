@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Sparkles, Trophy, Shield, Zap, Eye, Flame } from "lucide-react";
+import { BookOpen, Sparkles, Trophy, Shield, Zap, Eye, Flame, HelpCircle } from "lucide-react";
 import { useLogin } from "@/hooks/use-game";
 import { FloatingOrbs } from "@/components/FloatingOrbs";
 import { useToast } from "@/hooks/use-toast";
@@ -66,7 +66,11 @@ export function Intro() {
     >
       <FloatingOrbs />
 
-      <div className="absolute top-8 right-8 z-20">
+      <div className="absolute top-8 right-8 z-20 flex gap-4">
+        <Link href="/guide" className="flex items-center gap-2 text-primary/70 hover:text-primary transition-colors font-serif">
+          <HelpCircle className="w-5 h-5" />
+          <span>Guide</span>
+        </Link>
         <Link href="/leaderboard" className="flex items-center gap-2 text-primary/70 hover:text-primary transition-colors font-serif">
           <Trophy className="w-5 h-5" />
           <span>Leaderboard</span>
