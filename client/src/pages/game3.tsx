@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { GameLayout } from "@/components/GameLayout";
 import { useUpdateProgress } from "@/hooks/use-game";
 import { useGameStore } from "@/lib/store";
-import { ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2, HelpCircle } from "lucide-react";
 
 const MEMORIES = [
   { 
@@ -61,6 +61,9 @@ export function Game3() {
           onSuccess: () => {
             setTimeout(() => setLocation("/hub"), 2000);
           }
+      <Link href="/guide" className="absolute top-8 right-8 z-20 text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif">
+        <HelpCircle className="w-5 h-5" />
+      </Link>
         });
       } else {
         setTimeout(() => setLocation("/hub"), 2000);

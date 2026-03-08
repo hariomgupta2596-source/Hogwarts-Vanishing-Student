@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { Lock, Unlock, Trophy, Compass, MapPin, LogOut, Shirt } from "lucide-react";
+import { Lock, Unlock, Trophy, Compass, MapPin, LogOut, Shirt, HelpCircle } from "lucide-react";
 import { useGameStore } from "@/lib/store";
 import { PageWrapper } from "@/components/PageWrapper";
 import { useUpdateCustomization } from "@/hooks/use-game";
@@ -56,6 +56,9 @@ export function Hub() {
             </div>
             <Link href="/leaderboard" className="glass-panel px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-primary/10 transition-colors cursor-pointer text-primary">
               Standings
+            </Link>
+            <Link href="/guide" className="glass-panel px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-primary/10 transition-colors cursor-pointer text-primary">
+              <HelpCircle className="w-5 h-5" />
             </Link>
           </div>
         </header>
