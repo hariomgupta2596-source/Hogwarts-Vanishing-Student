@@ -33,9 +33,9 @@ const STAGES = [
   {
     id: "traces",
     title: "Magical Traces",
-    initialFen: "6k1/5ppp/5Q2/8/3P4/8/q1rK1P1P w - - 0 1",
-    solution: "Qf7",
-    hint: "Move the Queen to f7 for checkmate",
+    initialFen: "8/8/2Q5/3B4/1K6/8/Nk6/2R5 w - - 0 1",
+    solution: "Rc2",
+    hint: "Move the Rook to c2 for checkmate",
     evidence: {
       directive: "The vanished student left High magical traces.",
       data: [
@@ -67,7 +67,7 @@ const STAGES = [
 export function Game4() {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [unlockedStages, setUnlockedStages] = useState<string[]>([]);
-  const [gameState, setGameState] = useState<{ [key: string]: any }>({});
+  const [gameState, setGameState] = useState<{ [key: string]: Chess }>({});
   const [moveCount, setMoveCount] = useState<{ [key: string]: number }>({});
   const [guess, setGuess] = useState("");
   const [guessError, setGuessError] = useState(false);
@@ -82,16 +82,23 @@ export function Game4() {
   // Initialize chess game for current stage
   useEffect(() => {
     if (!gameState[currentStage.id]) {
+      // Ensure we only create a new instance if initialFen is valid
+      try {
+        const initialGame = new Chess(currentStage.initialFen);
       setGameState(prev => ({
         ...prev,
-        [currentStage.id]: new Chess(currentStage.initialFen)
+        [currentStage.id]: initialGame
       }));
     setMoveCount(prev => ({
           ...prev,
           [currentStage.id]: 0
         }));
       }
-    }, [currentStageIndex, currentStage.id, currentStage.initialFen, gameState]);
+      catch (e) {
+          console.error("Invalid FEN detected in STAGES:", currentStage.initialFen);
+        }
+      }
+    }, [currentStageIndex, currentStage.id]);
 
   const currentGame = gameState[currentStage.id];
   const currentMoves = moveCount[currentStage.id] || 0;
@@ -109,9 +116,9 @@ export function Game4() {
 
   const makeMove = (source: string, target: string): boolean => {
     if (!currentGame) return false;
-    
-    const gameCopy = new Chess(currentGame.fen());
     try {
+    const gameCopy = new Chess(currentGame.fen());
+    
       const result = gameCopy.move({ 
         from: source, 
         to: target, 
