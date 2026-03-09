@@ -35,7 +35,7 @@ const STAGES = [
     title: "Magical Traces",
     initialFen: "8/8/2Q5/3B4/1K6/8/Nk6/2R5 w - - 0 1",
     solution: "Rc2",
-    hint: "Move the Rook to c2 for checkmate",
+    hint: "Move the Queen to c3 for checkmate",
     evidence: {
       directive: "The vanished student left High magical traces.",
       data: [
@@ -51,7 +51,7 @@ const STAGES = [
     title: "Identity Status",
     initialFen: "r4r2/pQ3ppp/2np4/2bk4/5P2/6P1/PPP5/R1B1KB1q w - - 0 1",
     solution: "Qf7",
-    hint: "Move the Queen to f7 for checkmate",
+    hint: "Move the Queen to b3 for checkmate",
     evidence: {
       directive: "The vanished student's identity will be Missing.",
       data: [
@@ -230,7 +230,7 @@ export function Game4() {
                   <h3 className="font-display text-lg text-primary mb-1">Security Protocol: Stage {currentStageIndex + 1}</h3>
                   <p className="font-serif text-muted-foreground">
                     Bypass the Wizard's Chess defense to unlock the <strong>{currentStage.title}</strong> evidence.
-                    <span className="text-foreground font-bold ml-1 text-primary">Checkmate in two moves. White to move.</span>
+                    <span className="text-foreground font-bold ml-1 text-primary">Checkmate in one or two moves. White to move.</span>
                   </p>
                 </div>
               </div>
