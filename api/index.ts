@@ -6,11 +6,13 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// URL rewrite middleware for Vercel Serverless Function routing
+// Normalize request URL for Vercel Serverless Function environment
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  if (!req.url.startsWith("/api")) {
-    req.url = "/api" + (req.url.startsWith("/") ? "" : "/") + req.url;
+  let url = req.url || "/";
+  if (!url.startsWith("/api")) {
+    url = "/api" + (url.startsWith("/") ? "" : "/") + url;
   }
+  req.url = url;
   next();
 });
 
@@ -19,7 +21,19 @@ async function init() {
   if (!registered) {
     await registerRoutes({} as any, app);
 
-    // Global Error Handler to guarantee JSON responses (never HTML errors)
+    // Explicit route fallbacks without /api prefix
+    app.post("/users", (req, res, next) => { req.url = "/api/users"; app(req, res, next); });
+    app.post("/users/:id/progress", (req, res, next) => { req.url = `/api/users/${req.params.id}/progress`; app(req, res, next); });
+    app.post("/users/:id/choice", (req, res, next) => { req.url = `/api/users/${req.params.id}/choice`; app(req, res, next); });
+    app.post("/users/:id/customization", (req, res, next) => { req.url = `/api/users/${req.params.id}/customization`; app(req, res, next); });
+    app.get("/leaderboard", (req, res, next) => { req.url = "/api/leaderboard"; app(req, res, next); });
+
+    // Catch-all 404 handler for API routes (always return JSON)
+    app.use((_req: Request, res: Response) => {
+      res.status(404).json({ message: "API endpoint not found" });
+    });
+
+    // Global Error Handler for Vercel Serverless Function to ensure JSON output
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
       console.error("Vercel API Error:", err);
       const status = err.status || err.statusCode || 500;
