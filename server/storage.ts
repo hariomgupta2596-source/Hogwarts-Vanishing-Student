@@ -221,5 +221,64 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = process.env.DATABASE_URL ? new DatabaseStorage() : new MemStorage();
+export class SafeStorage implements IStorage {
+  private dbStorage?: DatabaseStorage;
+  private memStorage: MemStorage;
+
+  constructor() {
+    this.memStorage = new MemStorage();
+    if (process.env.DATABASE_URL) {
+      try {
+        this.dbStorage = new DatabaseStorage();
+      } catch (e) {
+        console.error("Failed to initialize DatabaseStorage, using MemStorage:", e);
+      }
+    }
+  }
+
+  private async execute<T>(
+    dbFn: (s: DatabaseStorage) => Promise<T>,
+    memFn: (s: MemStorage) => Promise<T>
+  ): Promise<T> {
+    if (this.dbStorage) {
+      try {
+        return await dbFn(this.dbStorage);
+      } catch (err) {
+        console.error("Database storage query error, falling back to MemStorage:", err);
+      }
+    }
+    return await memFn(this.memStorage);
+  }
+
+  async getUser(id: number) {
+    return this.execute(s => s.getUser(id), s => s.getUser(id));
+  }
+
+  async getUserByUsername(username: string) {
+    return this.execute(s => s.getUserByUsername(username), s => s.getUserByUsername(username));
+  }
+
+  async createUser(user: Pick<InsertUser, "username" | "password" | "house">) {
+    return this.execute(s => s.createUser(user), s => s.createUser(user));
+  }
+
+  async updateUserProgress(id: number, scoreAdded: number, gameCompleted: number) {
+    return this.execute(s => s.updateUserProgress(id, scoreAdded, gameCompleted), s => s.updateUserProgress(id, scoreAdded, gameCompleted));
+  }
+
+  async makeFinalChoice(id: number, choice: "seal" | "expose" | "erase") {
+    return this.execute(s => s.makeFinalChoice(id, choice), s => s.makeFinalChoice(id, choice));
+  }
+
+  async getLeaderboard() {
+    return this.execute(s => s.getLeaderboard(), s => s.getLeaderboard());
+  }
+
+  async updateCustomization(id: number, item: string) {
+    return this.execute(s => s.updateCustomization(id, item), s => s.updateCustomization(id, item));
+  }
+}
+
+export const storage = new SafeStorage();
+
 
