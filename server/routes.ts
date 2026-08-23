@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import type { Server } from "http";
-import { storage } from "./storage";
-import { api } from "../shared/routes";
+import { storage } from "./storage.js";
+import { api } from "../shared/routes.js";
 import { z } from "zod";
 
 export async function registerRoutes(
@@ -30,7 +30,11 @@ export async function registerRoutes(
       }
       
       // Create new user
-      user = await storage.createUser({ username: input.username });
+      user = await storage.createUser({
+        username: input.username,
+        password: input.password,
+        house: input.house,
+      });
       return res.status(201).json(user);
       
     } catch (err) {
