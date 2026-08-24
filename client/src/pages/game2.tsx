@@ -4,7 +4,10 @@ import { useLocation, Link } from "wouter";
 import { GameLayout } from "@/components/GameLayout";
 import { useUpdateProgress } from "@/hooks/use-game";
 import { useGameStore } from "@/lib/store";
-import { Lock, Unlock, HelpCircle as HelpCircleIcon, FileText } from "lucide-react";
+import { HintButton } from "@/components/HintButton";
+import { ScoreToast } from "@/components/ScoreToast";
+import { soundManager } from "@/lib/audio";
+import { Lock, Unlock, HelpCircle as HelpCircleIcon } from "lucide-react";
 import receiptBg from "@assets/recipt_bg.jpg";
 
 const CODE = "052";
@@ -20,32 +23,38 @@ export function Game2() {
   const [inputCode, setInputCode] = useState(["", "", ""]);
   const [mathAnswers, setMathAnswers] = useState({ q1: "", q2: "", q3: "" });
   const [error, setError] = useState(false);
-  const [showHint, setShowHint] = useState(false);
-  
+  const [scoreDelta, setScoreDelta] = useState<number | null>(null);
+
   const { mutate: updateProgress, isPending } = useUpdateProgress();
   const [, setLocation] = useLocation();
   const user = useGameStore(state => state.user);
+  const isMuted = useGameStore(state => state.isMuted);
 
   const handleCodeChange = (idx: number, val: string) => {
     if (!/^\d?$/.test(val)) return;
+    if (!isMuted) soundManager.playClick();
     const newCode = [...inputCode];
     newCode[idx] = val;
     setInputCode(newCode);
     if (newCode.join("") === CODE) {
+      if (!isMuted) soundManager.playSuccess();
       setTimeout(() => setStep("assemble"), 500);
     }
   };
 
   const checkMath = () => {
     if (mathAnswers.q1 === "2" && mathAnswers.q2 === "3" && mathAnswers.q3 === "7") {
+      if (!isMuted) soundManager.playSuccess();
       if (user && user.completedGames < 2) {
+        setScoreDelta(100);
         updateProgress({ scoreAdded: 100, gameCompleted: 2 }, {
-          onSuccess: () => setLocation("/hub")
+          onSuccess: () => setTimeout(() => setLocation("/hub"), 1200)
         });
       } else {
         setLocation("/hub");
       }
     } else {
+      if (!isMuted) soundManager.playError();
       setError(true);
       setTimeout(() => setError(false), 2000);
     }
@@ -53,17 +62,26 @@ export function Game2() {
 
   return (
     <GameLayout title="The Sealed Evidence">
-        
-      <Link href="/guide" className="absolute top-8 right-8 z-20 text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif">
-        <HelpCircleIcon className="w-5 h-5" />
-        <span>Guide</span>
-      </Link>
-        <div className="flex-1 flex flex-col items-center justify-center mt-4"
+      <ScoreToast delta={scoreDelta} message="Trial 2 Completed!" />
+
+      <div className="absolute top-8 right-8 z-20 flex items-center gap-4">
+        <HintButton
+          gameId={2}
+          freeHint="Analyze the clues: 738 eliminates 7, 3, and 8. 682 places 2 at the end. 0 is the first digit."
+          deepHint="The code is 052. On the receipt math: 2 Butterbeers at 2 S. = 4 S., 1 Pumpkin Pasty at 3 S. = 3 S., Total = 7 Sickles."
+        />
+        <Link href="/guide" className="text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif text-sm">
+          <HelpCircleIcon className="w-5 h-5" />
+          <span>Guide</span>
+        </Link>
+      </div>
+
+      <div 
+        className="flex-1 flex flex-col items-center justify-center mt-4"
         style={{ 
           backgroundImage: `linear-gradient(rgba(10, 10, 15, 0.8), rgba(10, 10, 15, 0.8)), url(${receiptBg})` 
         }}
       >
-        
         <AnimatePresence mode="wait">
           {phase === "lock" && (
             <motion.div 
@@ -94,18 +112,10 @@ export function Game2() {
                       maxLength={1}
                       value={digit}
                       onChange={(e) => handleCodeChange(i, e.target.value)}
-                      className="w-16 h-20 bg-background/50 border-2 border-primary/30 rounded-xl text-center text-4xl font-display text-primary focus:border-primary focus:outline-none transition-all"
+                      className="w-16 h-20 bg-background/50 border-2 border-primary/30 rounded-xl text-center text-4xl font-display text-primary focus:border-primary focus:outline-none transition-all focus-visible:ring-2 focus-visible:ring-primary"
                     />
                   ))}
                 </div>
-
-                <button 
-                  onClick={() => setShowHint(true)}
-                  className="text-primary/60 hover:text-primary transition-colors flex items-center gap-2 mx-auto text-sm font-serif"
-                >
-                  <HelpCircleIcon className="w-4 h-4" />
-                  {showHint ? "Clue: 0 and 5 are the other digits" : "Need a hint?"}
-                </button>
               </div>
             </motion.div>
           )}
@@ -133,7 +143,7 @@ export function Game2() {
                   className="absolute w-24 h-24 bg-[#f4e4bc] border border-[#3a2f24]/20 shadow-lg"
                   style={{ 
                     clipPath: `polygon(${Math.random()*20}% 0%, ${80+Math.random()*20}% 0%, 100% ${80+Math.random()*20}%, 0% 100%)`,
-                     backgroundImage: 'url("https://www.transparenttextures.com/patterns/old-wall.png")'
+                    backgroundImage: 'url("https://www.transparenttextures.com/patterns/old-wall.png")'
                   }}
                 />
               ))}
@@ -168,7 +178,7 @@ export function Game2() {
                         type="text" 
                         value={mathAnswers.q1}
                         onChange={(e) => setMathAnswers({...mathAnswers, q1: e.target.value})}
-                        className="w-8 h-8 bg-transparent border-b-2 border-[#3a2f24] text-center focus:outline-none" 
+                        className="w-8 h-8 bg-transparent border-b-2 border-[#3a2f24] text-center focus:outline-none focus:border-amber-700" 
                       />
                       <span>S. = 4 S.</span>
                     </div>
@@ -182,7 +192,7 @@ export function Game2() {
                         type="text" 
                         value={mathAnswers.q2}
                         onChange={(e) => setMathAnswers({...mathAnswers, q2: e.target.value})}
-                        className="w-8 h-8 bg-transparent border-b-2 border-[#3a2f24] text-center focus:outline-none" 
+                        className="w-8 h-8 bg-transparent border-b-2 border-[#3a2f24] text-center focus:outline-none focus:border-amber-700" 
                       />
                       <span>S.</span>
                     </div>
@@ -195,7 +205,7 @@ export function Game2() {
                         type="text" 
                         value={mathAnswers.q3}
                         onChange={(e) => setMathAnswers({...mathAnswers, q3: e.target.value})}
-                        className="w-12 h-10 bg-transparent border-b-2 border-[#3a2f24] text-center focus:outline-none" 
+                        className="w-12 h-10 bg-transparent border-b-2 border-[#3a2f24] text-center focus:outline-none focus:border-amber-700" 
                       />
                       <span>Sickles</span>
                     </div>
@@ -207,7 +217,8 @@ export function Game2() {
                 {error && <p className="text-destructive font-serif mb-4">The math does not align.</p>}
                 <button
                   onClick={checkMath}
-                  className="bg-primary text-primary-foreground px-12 py-4 rounded-xl font-display font-bold text-xl hover:bg-primary/90 transition-all box-glow"
+                  disabled={isPending}
+                  className="bg-primary text-primary-foreground px-12 py-4 rounded-xl font-display font-bold text-xl hover:bg-primary/90 transition-all box-glow focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   {isPending ? "Verifying..." : "Verify Record"}
                 </button>
@@ -215,7 +226,6 @@ export function Game2() {
             </motion.div>
           )}
         </AnimatePresence>
-
       </div>
     </GameLayout>
   );

@@ -65,6 +65,18 @@ export const api = {
         404: errorSchemas.notFound,
       },
     },
+    checkUsername: {
+      method: "GET" as const,
+      path: "/api/users/check-username" as const,
+      input: z.object({
+        username: z.string(),
+      }),
+      responses: {
+        200: z.object({
+          available: z.boolean(),
+        }),
+      },
+    },
   },
   leaderboard: {
     get: {
@@ -78,6 +90,20 @@ export const api = {
             score: z.number(),
             finalChoice: z.string().nullable(),
             equippedItem: z.string().optional(),
+          })
+        ),
+      },
+    },
+    houses: {
+      method: "GET" as const,
+      path: "/api/leaderboard/houses" as const,
+      responses: {
+        200: z.array(
+          z.object({
+            house: z.string(),
+            totalScore: z.number(),
+            investigatorCount: z.number(),
+            averageScore: z.number(),
           })
         ),
       },

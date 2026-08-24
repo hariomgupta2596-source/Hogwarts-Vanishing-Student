@@ -23,10 +23,12 @@ async function init() {
 
     // Explicit route fallbacks without /api prefix
     app.post("/users", (req, res, next) => { req.url = "/api/users"; app(req, res, next); });
+    app.get("/users/check-username", (req, res, next) => { req.url = "/api/users/check-username" + (req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : ""); app(req, res, next); });
     app.post("/users/:id/progress", (req, res, next) => { req.url = `/api/users/${req.params.id}/progress`; app(req, res, next); });
     app.post("/users/:id/choice", (req, res, next) => { req.url = `/api/users/${req.params.id}/choice`; app(req, res, next); });
     app.post("/users/:id/customization", (req, res, next) => { req.url = `/api/users/${req.params.id}/customization`; app(req, res, next); });
     app.get("/leaderboard", (req, res, next) => { req.url = "/api/leaderboard"; app(req, res, next); });
+    app.get("/leaderboard/houses", (req, res, next) => { req.url = "/api/leaderboard/houses"; app(req, res, next); });
 
     // Catch-all 404 handler for API routes (always return JSON)
     app.use((_req: Request, res: Response) => {

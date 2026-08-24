@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
-import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, Sparkles, Trophy, Shield, Zap, Eye, Flame, HelpCircle } from "lucide-react";
-import { useLogin } from "@/hooks/use-game";
+import { useState, useEffect } from "react";
+import { useLocation, Link } from "wouter";
+import { motion } from "framer-motion";
+import { BookOpen, Sparkles, Trophy, Shield, Zap, Eye, Flame, HelpCircle, CheckCircle2, XCircle, KeyRound } from "lucide-react";
+import { useLogin, useCheckUsername } from "@/hooks/use-game";
 import { FloatingOrbs } from "@/components/FloatingOrbs";
+import { AudioToggle } from "@/components/AudioToggle";
 import { useToast } from "@/hooks/use-toast";
 import { useGameStore } from "@/lib/store";
-import { useEffect } from "react";
-import { Link } from "wouter";
+import { soundManager } from "@/lib/audio";
 import entryBg from "@assets/Entry_Background_1772032172890.png";
 
 const HOUSES = [
@@ -21,11 +21,14 @@ export function Intro() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [selectedHouse, setSelectedHouse] = useState<string | null>(null);
+  
   const { mutate: login, isPending } = useLogin();
+  const { data: checkData, isLoading: isChecking } = useCheckUsername(username);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const user = useGameStore(state => state.user);
   const setHouse = useGameStore(state => state.setHouse);
+  const isMuted = useGameStore(state => state.isMuted);
 
   useEffect(() => {
     if (user) {
@@ -33,9 +36,27 @@ export function Intro() {
     }
   }, [user, setLocation]);
 
+  // Cipher strength calculation
+  const getCipherStrength = (pass: string) => {
+    if (!pass) return { score: 0, label: "Empty", color: "bg-muted text-muted-foreground" };
+    let score = 0;
+    if (pass.length >= 6) score += 1;
+    if (pass.length >= 10) score += 1;
+    if (/[A-Z]/.test(pass)) score += 1;
+    if (/[0-9]/.test(pass)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pass)) score += 1;
+
+    if (score <= 2) return { score: 1, label: "Weak Cipher", color: "bg-red-500 text-red-400" };
+    if (score <= 4) return { score: 2, label: "Moderate Cipher", color: "bg-amber-500 text-amber-400" };
+    return { score: 3, label: "Strong Magical Cipher", color: "bg-emerald-500 text-emerald-400" };
+  };
+
+  const cipherStrength = getCipherStrength(password);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim() || !selectedHouse) {
+      if (!isMuted) soundManager.playError();
       toast({
         title: "Missing Information",
         description: "Please provide a name, password, and select your house.",
@@ -44,12 +65,15 @@ export function Intro() {
       return;
     }
     
+    if (!isMuted) soundManager.playClick();
     setHouse(selectedHouse);
     login({ username, password, house: selectedHouse }, {
       onSuccess: () => {
+        if (!isMuted) soundManager.playSuccess();
         setLocation("/hub");
       },
       onError: (error: any) => {
+        if (!isMuted) soundManager.playError();
         toast({
           title: "Access Denied",
           description: error.message || "Invalid credentials or investigator already active.",
@@ -66,12 +90,13 @@ export function Intro() {
     >
       <FloatingOrbs />
 
-      <div className="absolute top-8 right-8 z-20 flex gap-4">
-        <Link href="/guide" className="flex items-center gap-2 text-primary/70 hover:text-primary transition-colors font-serif">
+      <div className="absolute top-8 right-8 z-20 flex items-center gap-4">
+        <AudioToggle />
+        <Link href="/guide" className="flex items-center gap-2 text-primary/70 hover:text-primary transition-colors font-serif text-sm">
           <HelpCircle className="w-5 h-5" />
           <span>Guide</span>
         </Link>
-        <Link href="/leaderboard" className="flex items-center gap-2 text-primary/70 hover:text-primary transition-colors font-serif">
+        <Link href="/leaderboard" className="flex items-center gap-2 text-primary/70 hover:text-primary transition-colors font-serif text-sm">
           <Trophy className="w-5 h-5" />
           <span>Leaderboard</span>
         </Link>
@@ -96,27 +121,57 @@ export function Intro() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid md:grid-cols-2 gap-6">
+            {/* Username Input with Live Validation */}
             <div className="space-y-2">
-              <label className="font-serif text-xs text-primary/80 uppercase tracking-widest ml-1">Investigator Name</label>
+              <div className="flex justify-between items-center ml-1">
+                <label className="font-serif text-xs text-primary/80 uppercase tracking-widest">Investigator Name</label>
+                {username.trim().length > 0 && (
+                  <span className="text-[11px] font-serif flex items-center gap-1">
+                    {isChecking ? (
+                      <span className="text-muted-foreground animate-pulse">Checking records...</span>
+                    ) : checkData?.available ? (
+                      <span className="text-emerald-400 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> New Identity</span>
+                    ) : (
+                      <span className="text-amber-400 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Existing Profile</span>
+                    )}
+                  </span>
+                )}
+              </div>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Name..."
-                className="w-full bg-background/50 border-2 border-primary/20 rounded-xl px-4 py-3 font-serif text-foreground focus:outline-none focus:border-primary/50 transition-all"
+                className="w-full bg-background/50 border-2 border-primary/20 rounded-xl px-4 py-3 font-serif text-foreground focus:outline-none focus:border-primary/50 transition-all focus-visible:ring-2 focus-visible:ring-primary"
                 disabled={isPending}
               />
             </div>
+
+            {/* Password Input with Cipher Strength Indicator */}
             <div className="space-y-2">
-              <label className="font-serif text-xs text-primary/80 uppercase tracking-widest ml-1">Access Cipher</label>
+              <div className="flex justify-between items-center ml-1">
+                <label className="font-serif text-xs text-primary/80 uppercase tracking-widest">Access Cipher</label>
+                {password.length > 0 && (
+                  <span className={`text-[11px] font-serif ${cipherStrength.color.split(' ')[1]}`}>
+                    {cipherStrength.label}
+                  </span>
+                )}
+              </div>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password..."
-                className="w-full bg-background/50 border-2 border-primary/20 rounded-xl px-4 py-3 font-serif text-foreground focus:outline-none focus:border-primary/50 transition-all"
+                className="w-full bg-background/50 border-2 border-primary/20 rounded-xl px-4 py-3 font-serif text-foreground focus:outline-none focus:border-primary/50 transition-all focus-visible:ring-2 focus-visible:ring-primary"
                 disabled={isPending}
               />
+              {password.length > 0 && (
+                <div className="flex gap-1.5 pt-1">
+                  <div className={`h-1 flex-1 rounded-full transition-all ${cipherStrength.score >= 1 ? cipherStrength.color.split(' ')[0] : 'bg-muted/30'}`} />
+                  <div className={`h-1 flex-1 rounded-full transition-all ${cipherStrength.score >= 2 ? cipherStrength.color.split(' ')[0] : 'bg-muted/30'}`} />
+                  <div className={`h-1 flex-1 rounded-full transition-all ${cipherStrength.score >= 3 ? cipherStrength.color.split(' ')[0] : 'bg-muted/30'}`} />
+                </div>
+              )}
             </div>
           </div>
 
@@ -130,13 +185,16 @@ export function Intro() {
                   <button
                     key={house.id}
                     type="button"
-                    onClick={() => setSelectedHouse(house.id)}
-                    className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-300 ${
-                      isSelected ? `${house.border} bg-primary/10 scale-105` : "border-transparent bg-background/30 hover:bg-background/50"
+                    onClick={() => {
+                      if (!isMuted) soundManager.playClick();
+                      setSelectedHouse(house.id);
+                    }}
+                    className={`flex flex-col items-center p-4 rounded-xl border-2 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                      isSelected ? `${house.border} bg-primary/10 scale-105 box-glow` : "border-transparent bg-background/30 hover:bg-background/50"
                     }`}
                   >
                     <Icon className={`w-8 h-8 mb-2 ${isSelected ? house.color : "text-muted-foreground"}`} />
-                    <span className={`text-xs font-display tracking-wider ${isSelected ? "text-foreground" : "text-muted-foreground"}`}>
+                    <span className={`text-xs font-display tracking-wider ${isSelected ? "text-foreground font-bold" : "text-muted-foreground"}`}>
                       {house.name}
                     </span>
                   </button>
@@ -148,7 +206,7 @@ export function Intro() {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full relative group overflow-hidden rounded-xl p-[2px] disabled:opacity-50"
+            className="w-full relative group overflow-hidden rounded-xl p-[2px] disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
             <span className="absolute inset-0 bg-gradient-to-r from-primary/50 via-primary to-primary/50 opacity-70 group-hover:opacity-100 transition-opacity" />
             <div className="relative bg-background px-8 py-4 rounded-[10px] flex items-center justify-center gap-3 transition-all group-hover:bg-background/80">

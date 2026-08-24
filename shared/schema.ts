@@ -42,4 +42,11 @@ export type FinalChoiceRequest = {
 };
 
 export type UserResponse = User;
-export type LeaderboardResponse = Pick<User, "id" | "username" | "score" | "finalChoice">[];
+export type LeaderboardResponse = Pick<User, "id" | "username" | "score" | "finalChoice" | "equippedItem">[];
+export type HouseStanding = {
+  house: string;
+  totalScore: number;
+  investigatorCount: number;
+  averageScore: number;
+};
+export type HouseStandingsResponse = HouseStanding[];

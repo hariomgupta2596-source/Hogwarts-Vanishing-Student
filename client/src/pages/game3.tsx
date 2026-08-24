@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation, Link } from "wouter";
 import { GameLayout } from "@/components/GameLayout";
 import { useUpdateProgress } from "@/hooks/use-game";
 import { useGameStore } from "@/lib/store";
+import { HintButton } from "@/components/HintButton";
+import { ScoreToast } from "@/components/ScoreToast";
+import { soundManager } from "@/lib/audio";
 import { ChevronLeft, ChevronRight, AlertTriangle, CheckCircle2, HelpCircle } from "lucide-react";
 
 const MEMORIES = [
@@ -39,34 +42,45 @@ const MEMORIES = [
 
 export function Game3() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [, setSelectedId] = useState<number | null>(null);
   const [error, setError] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [scoreDelta, setScoreDelta] = useState<number | null>(null);
   
   const { mutate: updateProgress, isPending } = useUpdateProgress();
   const [, setLocation] = useLocation();
   const user = useGameStore(state => state.user);
+  const isMuted = useGameStore(state => state.isMuted);
 
-  const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % MEMORIES.length);
-  const prevSlide = () => setCurrentIndex((prev) => (prev - 1 + MEMORIES.length) % MEMORIES.length);
+  const nextSlide = () => {
+    if (!isMuted) soundManager.playClick();
+    setCurrentIndex((prev) => (prev + 1) % MEMORIES.length);
+  };
+
+  const prevSlide = () => {
+    if (!isMuted) soundManager.playClick();
+    setCurrentIndex((prev) => (prev - 1 + MEMORIES.length) % MEMORIES.length);
+  };
 
   const handleIdentify = () => {
     const memory = MEMORIES[currentIndex];
     setSelectedId(memory.id);
     
     if (memory.isParadox) {
+      if (!isMuted) soundManager.playSuccess();
       setSuccess(true);
       if (user && user.completedGames < 3) {
+        setScoreDelta(150);
         updateProgress({ scoreAdded: 150, gameCompleted: 3 }, {
           onSuccess: () => {
-            setTimeout(() => setLocation("/hub"), 2000);
+            setTimeout(() => setLocation("/hub"), 1800);
           }
-      
         });
       } else {
-        setTimeout(() => setLocation("/hub"), 2000);
+        setTimeout(() => setLocation("/hub"), 1800);
       }
     } else {
+      if (!isMuted) soundManager.playError();
       setError(true);
       setTimeout(() => {
         setError(false);
@@ -75,8 +89,33 @@ export function Game3() {
     }
   };
 
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") nextSlide();
+      if (e.key === "ArrowLeft") prevSlide();
+      if (e.key === "Enter") handleIdentify();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentIndex]);
+
   return (
     <GameLayout title="The Pensieve Paradox">
+      <ScoreToast delta={scoreDelta} message="Trial 3 Completed!" />
+
+      <div className="absolute top-8 right-8 z-20 flex items-center gap-4">
+        <HintButton
+          gameId={3}
+          freeHint="Look for an impossible timeline conflict between two places at the exact same hour."
+          deepHint="Memory #3 ('The Hogsmeade Sighting') claims the student was in Hogsmeade at 09:30 AM while castle logs state they were in the Library."
+        />
+        <Link href="/guide" className="text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif text-sm">
+          <HelpCircle className="w-5 h-5" />
+          <span>Guide</span>
+        </Link>
+      </div>
+
       <div className="max-w-4xl mx-auto w-full mt-4 flex flex-col items-center">
         <div className="text-center mb-8">
           <p className="font-serif text-muted-foreground text-lg italic">
@@ -124,13 +163,15 @@ export function Game3() {
           {/* Navigation */}
           <button 
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-background/40 border border-primary/20 hover:bg-primary/20 transition-all z-20"
+            aria-label="Previous Memory"
+            className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-background/40 border border-primary/20 hover:bg-primary/20 transition-all z-20 focus-visible:ring-2 focus-visible:ring-primary"
           >
             <ChevronLeft className="w-8 h-8 text-primary" />
           </button>
           <button 
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-background/40 border border-primary/20 hover:bg-primary/20 transition-all z-20"
+            aria-label="Next Memory"
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-background/40 border border-primary/20 hover:bg-primary/20 transition-all z-20 focus-visible:ring-2 focus-visible:ring-primary"
           >
             <ChevronRight className="w-8 h-8 text-primary" />
           </button>
@@ -140,7 +181,7 @@ export function Game3() {
             <div className="absolute inset-0 z-30 flex items-center justify-center bg-primary/20 backdrop-blur-sm">
               <motion.div 
                 initial={{ scale: 0 }} animate={{ scale: 1 }}
-                className="bg-background/90 p-8 rounded-2xl border-2 border-primary box-glow flex flex-col items-center gap-4"
+                className="bg-background/90 p-8 rounded-2xl border-2 border-primary box-glow flex flex-col items-center gap-4 text-center"
               >
                 <CheckCircle2 className="w-16 h-16 text-primary" />
                 <h4 className="font-display text-2xl text-primary">Paradox Identified</h4>
@@ -164,7 +205,7 @@ export function Game3() {
             onClick={handleIdentify}
             disabled={isPending || error || success}
             className={`
-              relative group flex items-center gap-3 px-12 py-5 rounded-2xl font-display font-bold text-xl transition-all
+              relative group flex items-center gap-3 px-12 py-5 rounded-2xl font-display font-bold text-xl transition-all focus-visible:ring-2 focus-visible:ring-primary
               ${error ? 'bg-destructive text-destructive-foreground animate-shake' : 'bg-primary text-primary-foreground hover:scale-105 box-glow-strong'}
               disabled:opacity-50
             `}

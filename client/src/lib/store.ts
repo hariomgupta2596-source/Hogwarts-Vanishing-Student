@@ -5,8 +5,12 @@ import type { User } from '@shared/schema';
 interface GameState {
   user: User | null;
   house: string | null;
+  isMuted: boolean;
+  usedHints: Record<number, boolean>;
   setHouse: (house: string) => void;
   setUser: (user: User | null) => void;
+  toggleMute: () => void;
+  setHintUsed: (gameId: number) => void;
   logout: () => void;
 }
 
@@ -17,7 +21,13 @@ export const useGameStore = create<GameState>()(
       setUser: (user) => set({ user }),
       house: null,
       setHouse: (house) => set({ house }),
-      logout: () => set({ user: null, house: null }),
+      isMuted: false,
+      toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
+      usedHints: {},
+      setHintUsed: (gameId) => set((state) => ({
+        usedHints: { ...state.usedHints, [gameId]: true }
+      })),
+      logout: () => set({ user: null, house: null, usedHints: {} }),
     }),
     {
       name: 'vanishing-student-storage',

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, buildUrl } from "@shared/routes";
 import { useGameStore } from "@/lib/store";
 import type { CreateUserRequest, UpdateProgressRequest, FinalChoiceRequest, UserResponse, LeaderboardResponse } from "@shared/routes";
+import type { HouseStandingsResponse } from "@shared/schema";
 
 export function useLogin() {
   const setUser = useGameStore(state => state.setUser);
@@ -22,6 +23,20 @@ export function useLogin() {
     onSuccess: (user) => {
       setUser(user);
     }
+  });
+}
+
+export function useCheckUsername(username: string) {
+  return useQuery({
+    queryKey: ["check-username", username],
+    queryFn: async () => {
+      if (!username || username.trim().length === 0) return { available: true };
+      const res = await fetch(`${api.users.checkUsername.path}?username=${encodeURIComponent(username)}`);
+      if (!res.ok) return { available: true };
+      return res.json() as Promise<{ available: boolean }>;
+    },
+    enabled: username.trim().length > 0,
+    staleTime: 5000,
   });
 }
 
@@ -46,6 +61,7 @@ export function useUpdateProgress() {
     onSuccess: (updatedUser) => {
       setUser(updatedUser);
       queryClient.invalidateQueries({ queryKey: [api.leaderboard.get.path] });
+      queryClient.invalidateQueries({ queryKey: [api.leaderboard.houses.path] });
     }
   });
 }
@@ -71,6 +87,7 @@ export function useFinalChoice() {
     onSuccess: (updatedUser) => {
       setUser(updatedUser);
       queryClient.invalidateQueries({ queryKey: [api.leaderboard.get.path] });
+      queryClient.invalidateQueries({ queryKey: [api.leaderboard.houses.path] });
     }
   });
 }
@@ -102,6 +119,17 @@ export function useLeaderboard() {
       const res = await fetch(api.leaderboard.get.path);
       if (!res.ok) throw new Error("Failed to fetch leaderboard");
       return res.json() as Promise<LeaderboardResponse>;
+    }
+  });
+}
+
+export function useHouseStandings() {
+  return useQuery({
+    queryKey: [api.leaderboard.houses.path],
+    queryFn: async () => {
+      const res = await fetch(api.leaderboard.houses.path);
+      if (!res.ok) throw new Error("Failed to fetch house standings");
+      return res.json() as Promise<HouseStandingsResponse>;
     }
   });
 }

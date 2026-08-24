@@ -9,6 +9,7 @@ export interface IStorage {
   updateUserProgress(id: number, scoreAdded: number, gameCompleted: number): Promise<User | undefined>;
   makeFinalChoice(id: number, choice: "seal" | "expose" | "erase"): Promise<User | undefined>;
   getLeaderboard(): Promise<User[]>;
+  getHouseStandings(): Promise<{ house: string; totalScore: number; investigatorCount: number; averageScore: number; }[]>;
   updateCustomization(id: number, item: string): Promise<User | undefined>;
 }
 
@@ -104,6 +105,32 @@ export class DatabaseStorage implements IStorage {
   async getLeaderboard(): Promise<User[]> {
     // Top 50 users by score
     return await db.select().from(users).orderBy(desc(users.score)).limit(50);
+  }
+
+  async getHouseStandings(): Promise<{ house: string; totalScore: number; investigatorCount: number; averageScore: number; }[]> {
+    const allUsers = await db.select().from(users);
+    const HOUSES = ["gryffindor", "slytherin", "ravenclaw", "hufflepuff"];
+    const houseMap = new Map<string, { totalScore: number; count: number }>();
+    HOUSES.forEach(h => houseMap.set(h.toLowerCase(), { totalScore: 0, count: 0 }));
+
+    allUsers.forEach((u: User) => {
+      const h = (u.house || "gryffindor").toLowerCase();
+      const curr = houseMap.get(h) || { totalScore: 0, count: 0 };
+      houseMap.set(h, {
+        totalScore: curr.totalScore + (u.score || 0),
+        count: curr.count + 1,
+      });
+    });
+
+    return HOUSES.map(h => {
+      const stats = houseMap.get(h) || { totalScore: 0, count: 0 };
+      return {
+        house: h,
+        totalScore: stats.totalScore,
+        investigatorCount: stats.count,
+        averageScore: stats.count > 0 ? Math.round(stats.totalScore / stats.count) : 0,
+      };
+    }).sort((a, b) => b.totalScore - a.totalScore);
   }
 }
 
@@ -219,6 +246,31 @@ export class MemStorage implements IStorage {
       .sort((a, b) => b.score - a.score)
       .slice(0, 50);
   }
+
+  async getHouseStandings(): Promise<{ house: string; totalScore: number; investigatorCount: number; averageScore: number; }[]> {
+    const HOUSES = ["gryffindor", "slytherin", "ravenclaw", "hufflepuff"];
+    const houseMap = new Map<string, { totalScore: number; count: number }>();
+    HOUSES.forEach(h => houseMap.set(h.toLowerCase(), { totalScore: 0, count: 0 }));
+
+    Array.from(this.users.values()).forEach(u => {
+      const h = (u.house || "gryffindor").toLowerCase();
+      const curr = houseMap.get(h) || { totalScore: 0, count: 0 };
+      houseMap.set(h, {
+        totalScore: curr.totalScore + (u.score || 0),
+        count: curr.count + 1,
+      });
+    });
+
+    return HOUSES.map(h => {
+      const stats = houseMap.get(h) || { totalScore: 0, count: 0 };
+      return {
+        house: h,
+        totalScore: stats.totalScore,
+        investigatorCount: stats.count,
+        averageScore: stats.count > 0 ? Math.round(stats.totalScore / stats.count) : 0,
+      };
+    }).sort((a, b) => b.totalScore - a.totalScore);
+  }
 }
 
 export class SafeStorage implements IStorage {
@@ -272,6 +324,10 @@ export class SafeStorage implements IStorage {
 
   async getLeaderboard() {
     return this.execute(s => s.getLeaderboard(), s => s.getLeaderboard());
+  }
+
+  async getHouseStandings() {
+    return this.execute(s => s.getHouseStandings(), s => s.getHouseStandings());
   }
 
   async updateCustomization(id: number, item: string) {

@@ -2,16 +2,18 @@ import { useState, useEffect } from "react";
 import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { motion, AnimatePresence } from "framer-motion";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { GameLayout } from "@/components/GameLayout";
 import { useUpdateProgress } from "@/hooks/use-game";
 import { useGameStore } from "@/lib/store";
-import { Eye, Search, Swords, Trophy, ChevronRight, RotateCcw } from "lucide-react";
+import { HintButton } from "@/components/HintButton";
+import { ScoreToast } from "@/components/ScoreToast";
+import { soundManager } from "@/lib/audio";
+import { Search, Swords, ChevronRight, RotateCcw, HelpCircle } from "lucide-react";
 import trait1 from "@assets/student_Traits_1.png";
 import trait2 from "@assets/student_Traits_2.png";
 import trait3 from "@assets/student_Traits_3.png";
 import trait4 from "@assets/student_Traits_4.png";
-
 
 const STAGES = [
   {
@@ -68,13 +70,14 @@ export function Game4() {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [unlockedStages, setUnlockedStages] = useState<string[]>([]);
   const [gameState, setGameState] = useState<{ [key: string]: Chess }>({});
-  const [moveCount, setMoveCount] = useState<{ [key: string]: number }>({});
   const [guess, setGuess] = useState("");
   const [guessError, setGuessError] = useState(false);
-  
+  const [scoreDelta, setScoreDelta] = useState<number | null>(null);
+
   const { mutate: updateProgress, isPending } = useUpdateProgress();
   const [, setLocation] = useLocation();
   const user = useGameStore(state => state.user);
+  const isMuted = useGameStore(state => state.isMuted);
 
   const currentStage = STAGES[currentStageIndex];
   const isUnlocked = unlockedStages.includes(currentStage.id);
@@ -82,114 +85,90 @@ export function Game4() {
   // Initialize chess game for current stage
   useEffect(() => {
     if (!gameState[currentStage.id]) {
-      // Ensure we only create a new instance if initialFen is valid
       try {
         const initialGame = new Chess(currentStage.initialFen);
-      setGameState(prev => ({
-        ...prev,
-        [currentStage.id]: initialGame
-      }));
-    setMoveCount(prev => ({
+        setGameState(prev => ({
           ...prev,
-          [currentStage.id]: 0
+          [currentStage.id]: initialGame
         }));
+      } catch (e) {
+        console.error("Invalid FEN detected in STAGES:", currentStage.initialFen);
       }
-      catch (e) {
-          console.error("Invalid FEN detected in STAGES:", currentStage.initialFen);
-        }
-      }
-    }, [currentStageIndex, currentStage.id]);
+    }
+  }, [currentStageIndex, currentStage.id]);
 
   const currentGame = gameState[currentStage.id];
-  const currentMoves = moveCount[currentStage.id] || 0;
+
   const resetGame = () => {
+    if (!isMuted) soundManager.playClick();
     const newGame = new Chess(currentStage.initialFen);
     setGameState(prev => ({
       ...prev,
       [currentStage.id]: newGame
-    }));
-    setMoveCount(prev => ({
-      ...prev,
-      [currentStage.id]: 0
     }));
   };
 
   const makeMove = (source: string, target: string): boolean => {
     if (!currentGame) return false;
     try {
-    const gameCopy = new Chess(currentGame.fen());
-    
+      const gameCopy = new Chess(currentGame.fen());
       const result = gameCopy.move({ 
         from: source, 
         to: target, 
-        promotion: "q" // always promote to queen for simplicity
+        promotion: "q" 
       });
     
-    if (!result) return false;
-    
-    // Check if this move leads to checkmate (restrict checkmate path)
-    if (gameCopy.isCheckmate()) {
-        // Checkmate in white's first move - unlock immediately
-        setUnlockedStages([...unlockedStages, currentStage.id]);
+      if (!result) return false;
+
+      if (!isMuted) soundManager.playClick();
+
+      if (gameCopy.isCheckmate()) {
+        if (!isMuted) soundManager.playSuccess();
+        setUnlockedStages(prev => Array.from(new Set([...prev, currentStage.id])));
         const newGameState = { ...gameState };
         newGameState[currentStage.id] = gameCopy;
         setGameState(newGameState);
-        setMoveCount(prev => ({
-          ...prev,
-          [currentStage.id]: (prev[currentStage.id] || 0) + 1
-        }));
         return true;
       }
-      // Update board
 
-      
-    const newGameState = { ...gameState };
-    newGameState[currentStage.id] = gameCopy;
-    setGameState(newGameState);
+      const newGameState = { ...gameState };
+      newGameState[currentStage.id] = gameCopy;
+      setGameState(newGameState);
 
-    setMoveCount(prev => ({
-        ...prev,
-        [currentStage.id]: (prev[currentStage.id] || 0) + 1
-    }));
-
-    // Auto-move for black
       if (!gameCopy.isGameOver()) {
-          setTimeout(() => {
-            const gameCopy2 = new Chess(gameCopy.fen());
-            const moves = gameCopy2.moves();
-            if (moves.length > 0) {
-              // AI makes a random move
-              gameCopy2.move(moves[Math.floor(Math.random() * moves.length)]);
-              const finalState = { ...gameState };
-              finalState[currentStage.id] = gameCopy2;
-              setGameState(finalState);
-              setMoveCount(prev => ({
-                ...prev,
-                [currentStage.id]: (prev[currentStage.id] || 0) + 1
-              }));
-            }
-          }, 500);
-        }
-
-        return true;
-      }catch (error) {
-        // Catch-all for any unexpected chess.js logic errors
-        console.error("Chess move error:", error);
-        return false;
+        setTimeout(() => {
+          const gameCopy2 = new Chess(gameCopy.fen());
+          const moves = gameCopy2.moves();
+          if (moves.length > 0) {
+            gameCopy2.move(moves[Math.floor(Math.random() * moves.length)]);
+            const finalState = { ...gameState };
+            finalState[currentStage.id] = gameCopy2;
+            setGameState(finalState);
+          }
+        }, 500);
       }
-    };
+
+      return true;
+    } catch (error) {
+      console.error("Chess move error:", error);
+      return false;
+    }
+  };
 
   const handleFinalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (guess.trim().toLowerCase() === "arthur v.") {
+      if (!isMuted) soundManager.playSuccess();
       if (user && user.completedGames < 4) {
+        setScoreDelta(200);
         updateProgress({ scoreAdded: 200, gameCompleted: 4 }, {
-          onSuccess: () => setLocation("/hub")
+          onSuccess: () => setTimeout(() => setLocation("/hub"), 1200)
         });
       } else {
         setLocation("/hub");
       }
     } else {
+      if (!isMuted) soundManager.playError();
       setGuessError(true);
       setTimeout(() => setGuessError(false), 2000);
     }
@@ -197,15 +176,31 @@ export function Game4() {
 
   return (
     <GameLayout title="The Ministry Register">
-      <div className="max-w-4xl mx-auto w-full mt-8">
-        <div className="flex justify-center gap-4 mb-8 flex-wrap">
+      <ScoreToast delta={scoreDelta} message="Trial 4 Completed! All evidence gathered." />
+
+      <div className="max-w-4xl mx-auto w-full mt-8 relative">
+        <div className="absolute top-0 right-0 z-20 flex items-center gap-4">
+          <HintButton
+            gameId={4}
+            freeHint="Bypass each chess defense to unlock evidence, then find the student who is Present, has High traces, and is Missing."
+            deepHint="Bypass: Stage 1 (Ra7# or Ra8#), Stage 2 (Qc3#), Stage 3 (Qb3#). The vanished student is 'Arthur V.'."
+          />
+          <Link href="/guide" className="text-primary/70 hover:text-primary transition-colors flex items-center gap-2 font-serif text-sm">
+            <HelpCircle className="w-5 h-5" />
+          </Link>
+        </div>
+
+        <div className="flex justify-center gap-3 mb-8 flex-wrap">
           {STAGES.map((stage, idx) => (
             <button
               key={stage.id}
-              onClick={() => setCurrentStageIndex(idx)}
-              className={`px-4 py-2 rounded-lg font-display transition-all ${
+              onClick={() => {
+                if (!isMuted) soundManager.playClick();
+                setCurrentStageIndex(idx);
+              }}
+              className={`px-4 py-2 rounded-xl font-display transition-all focus-visible:ring-2 focus-visible:ring-primary ${
                 currentStageIndex === idx 
-                  ? "bg-primary text-primary-foreground box-glow" 
+                  ? "bg-primary text-primary-foreground box-glow font-bold" 
                   : "bg-background/40 border border-primary/20 text-muted-foreground hover:border-primary/50"
               }`}
             >
@@ -228,9 +223,9 @@ export function Game4() {
                 <Swords className="w-8 h-8 text-primary shrink-0 mt-1" />
                 <div>
                   <h3 className="font-display text-lg text-primary mb-1">Security Protocol: Stage {currentStageIndex + 1}</h3>
-                  <p className="font-serif text-muted-foreground">
+                  <p className="font-serif text-muted-foreground text-sm">
                     Bypass the Wizard's Chess defense to unlock the <strong>{currentStage.title}</strong> evidence.
-                    <span className="text-foreground font-bold ml-1 text-primary">Checkmate in one or two moves. White to move.</span>
+                    <span className="text-foreground font-bold ml-1 text-primary">Checkmate White to move.</span>
                   </p>
                 </div>
               </div>
@@ -242,7 +237,7 @@ export function Game4() {
                     onPieceDrop={(source, target) => makeMove(source, target)}
                     boardWidth={380}
                     customBoardStyle={{
-                      borderRadius: "10px",
+                      borderRadius: "12px",
                       boxShadow: "0 0 30px rgba(212, 175, 55, 0.4)"
                     }}
                     customDarkSquareStyle={{ backgroundColor: "#3b2f14" }}
@@ -252,10 +247,10 @@ export function Game4() {
               </div>
 
               <div className="flex flex-col items-center gap-3">
-                <p className="text-sm text-muted-foreground italic">{currentStage.hint}</p>
+                <p className="text-xs text-muted-foreground italic">{currentStage.hint}</p>
                 <button
                   onClick={resetGame}
-                  className="flex items-center gap-2 px-4 py-2 bg-background/50 border border-primary/30 rounded-lg hover:border-primary/60 transition-all text-primary font-serif text-sm"
+                  className="flex items-center gap-2 px-4 py-2 bg-background/50 border border-primary/30 rounded-lg hover:border-primary/60 transition-all text-primary font-serif text-sm focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <RotateCcw className="w-4 h-4" />
                   Reset Board
@@ -273,24 +268,24 @@ export function Game4() {
                 <Search className="w-8 h-8 text-primary shrink-0 mt-1" />
                 <div>
                   <h3 className="font-display text-lg text-primary mb-1">{currentStage.title} Evidence:</h3>
-                  <p className="font-serif text-muted-foreground">{currentStage.evidence.directive}</p>
+                  <p className="font-serif text-muted-foreground text-sm">{currentStage.evidence.directive}</p>
                 </div>
               </div>
 
               <div className="glass-panel rounded-2xl overflow-hidden border border-primary/20">
-                <div className="grid grid-cols-2 gap-4 p-4 border-b border-primary/20 bg-background/50 font-display text-primary/70 text-sm tracking-wider uppercase">
+                <div className="grid grid-cols-2 gap-4 p-4 border-b border-primary/20 bg-background/50 font-display text-primary/70 text-xs tracking-wider uppercase">
                   <div>Subject</div>
                   <div>Status</div>
                 </div>
                 
                 <div className="divide-y divide-primary/10">
                   {currentStage.evidence.data.map((row, idx) => (
-                    <div key={idx} className="grid grid-cols-2 gap-4 p-6 transition-all font-serif text-lg">
+                    <div key={idx} className="grid grid-cols-2 gap-4 p-6 transition-all font-serif text-base items-center">
                       <div className="flex items-center gap-4">
                         <img src={row.image} className="w-10 h-14 object-cover rounded border border-primary/20 shadow-sm" alt="" />
                         <span className={row.name === "Arthur V." ? "blur-[3px] hover:blur-none transition-all cursor-help" : ""}>{row.name}</span>
                       </div>
-                      <div className="flex items-center text-primary/90">{row.status}</div>
+                      <div className="flex items-center text-primary/90 font-semibold">{row.status}</div>
                     </div>
                   ))}
                 </div>
@@ -303,8 +298,8 @@ export function Game4() {
                   className="mt-12 flex flex-col items-center gap-6 p-8 glass-panel border-primary/40 box-glow"
                 >
                   <div className="text-center space-y-2">
-                    <h3 className="font-display text-2xl text-primary">Identify the Subject</h3>
-                    <p className="font-serif text-muted-foreground">Review all evidence and name the vanished student.</p>
+                    <h3 className="font-display text-2xl text-primary text-glow">Identify the Subject</h3>
+                    <p className="font-serif text-muted-foreground text-sm">Review all evidence and name the vanished student.</p>
                   </div>
                   <form onSubmit={handleFinalSubmit} className="flex flex-col items-center gap-4 w-full max-w-sm">
                     <div className="flex gap-2 w-full">
@@ -313,18 +308,18 @@ export function Game4() {
                         value={guess}
                         onChange={(e) => setGuess(e.target.value)}
                         placeholder="Type missing student name..."
-                        className="flex-1 bg-background/50 border-2 border-primary/30 rounded-xl px-4 py-3 font-serif text-lg text-primary focus:border-primary focus:outline-none transition-all"
+                        className="flex-1 bg-background/50 border-2 border-primary/30 rounded-xl px-4 py-3 font-serif text-base text-primary focus:border-primary focus:outline-none transition-all focus-visible:ring-2 focus-visible:ring-primary"
                       />
                       <button
                         type="submit"
                         disabled={isPending}
-                        className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-display font-bold hover:bg-primary/90 transition-all box-glow flex items-center gap-2 disabled:opacity-50"
+                        className="bg-primary text-primary-foreground px-6 py-3 rounded-xl font-display font-bold hover:bg-primary/90 transition-all box-glow flex items-center gap-2 disabled:opacity-50 text-sm focus-visible:ring-2 focus-visible:ring-primary"
                       >
-                        {isPending ? "Processing..." : <>Identify <ChevronRight className="w-5 h-5" /></>}
+                        {isPending ? "Processing..." : <>Identify <ChevronRight className="w-4 h-4" /></>}
                       </button>
                     </div>
                     {guessError && (
-                      <p className="text-destructive font-serif animate-bounce">The archives reject this identity.</p>
+                      <p className="text-destructive font-serif text-sm animate-bounce">The archives reject this identity.</p>
                     )}
                   </form>
                 </motion.div>

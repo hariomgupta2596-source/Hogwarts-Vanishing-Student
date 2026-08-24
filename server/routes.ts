@@ -139,5 +139,27 @@ export async function registerRoutes(
     }
   });
 
+  // GET /api/users/check-username - Check if username is available
+  app.get(api.users.checkUsername.path, async (req, res) => {
+    try {
+      const username = req.query.username as string;
+      if (!username) return res.status(200).json({ available: true });
+      const user = await storage.getUserByUsername(username);
+      return res.status(200).json({ available: !user });
+    } catch (err) {
+      return res.status(500).json({ message: "Failed to check username availability" });
+    }
+  });
+
+  // GET /api/leaderboard/houses - Get aggregated house standings
+  app.get(api.leaderboard.houses.path, async (_req, res) => {
+    try {
+      const standings = await storage.getHouseStandings();
+      return res.status(200).json(standings);
+    } catch (err) {
+      return res.status(500).json({ message: "Failed to fetch house standings" });
+    }
+  });
+
   return httpServer;
 }
